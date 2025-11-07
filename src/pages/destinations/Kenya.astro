@@ -1,0 +1,162 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const kenyaDestinations = [
+  {
+    name: "Masai Mara National Reserve",
+    description: "World-famous for the Great Migration, witness millions of wildebeest and zebras crossing the plains. Home to the Big Five and incredible wildlife viewing year-round.",
+    highlights: ["Great Migration (July-October)", "Big Five Safari", "Hot Air Balloon Rides", "Maasai Cultural Visits"],
+    bestTime: "July to October",
+    activities: ["Game Drives", "Photography", "Cultural Tours", "Balloon Safaris"],
+    image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&h=600&fit=crop"
+  },
+  {
+    name: "Amboseli National Park",
+    description: "Famous for its large elephant herds and stunning views of Mount Kilimanjaro. One of the best places in Africa to get close to free-ranging elephants.",
+    highlights: ["Mount Kilimanjaro Views", "Elephant Herds", "Birdwatching", "Maasai Communities"],
+    bestTime: "June to October, January to February",
+    activities: ["Wildlife Photography", "Game Drives", "Bird Watching", "Nature Walks"],
+    image: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=800&h=600&fit=crop"
+  },
+  {
+    name: "Nairobi",
+    description: "Kenya's vibrant capital city blending modern urban life with wildlife experiences. Visit the Giraffe Centre, David Sheldrick Elephant Orphanage, and Nairobi National Park.",
+    highlights: ["Giraffe Centre", "Elephant Orphanage", "Nairobi National Park", "Karen Blixen Museum"],
+    bestTime: "Year-round",
+    activities: ["City Tours", "Wildlife Sanctuaries", "Shopping", "Dining"],
+    image: "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=600&fit=crop"
+  },
+  {
+    name: "Diani Beach",
+    description: "Pristine white sand beaches along the Indian Ocean with crystal-clear turquoise waters. Perfect for relaxation, water sports, and marine life encounters.",
+    highlights: ["White Sand Beaches", "Coral Reefs", "Kite Surfing", "Colobus Monkeys"],
+    bestTime: "December to March, July to October",
+    activities: ["Snorkeling", "Diving", "Beach Relaxation", "Water Sports"],
+    image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop"
+  },
+  {
+    name: "Lake Nakuru National Park",
+    description: "Famous for its flamingo populations and rhino sanctuary. A compact park offering excellent wildlife viewing including lions, leopards, and both black and white rhinos.",
+    highlights: ["Flamingo Flocks", "Rhino Sanctuary", "Leopard Sightings", "Scenic Viewpoints"],
+    bestTime: "Year-round",
+    activities: ["Game Drives", "Bird Watching", "Photography", "Picnics"],
+    image: "https://images.unsplash.com/photo-1568454537842-d933259bb258?w=800&h=600&fit=crop"
+  },
+  {
+    name: "Tsavo National Parks",
+    description: "Kenya's largest national park, divided into Tsavo East and West. Known for red elephants, diverse landscapes, and the legendary man-eating lions of Tsavo.",
+    highlights: ["Red Elephants", "Mzima Springs", "Lugard Falls", "Vast Wilderness"],
+    bestTime: "June to October, January to February",
+    activities: ["Game Drives", "Wildlife Viewing", "Photography", "Camping"],
+    image: "https://images.unsplash.com/photo-1549366021-9f761d450615?w=800&h=600&fit=crop"
+  }
+];
+---
+
+<Layout title="Kenya Destinations - Stress-Free Holiday Makers">
+  <main class="pt-24 pb-20 bg-gradient-to-b from-sky to-sand">
+    <!-- Hero Section -->
+    <section class="px-6 py-16 bg-gradient-to-r from-ocean to-teal text-white">
+      <div class="max-w-6xl mx-auto text-center">
+        <h1 class="text-5xl md:text-6xl font-serif mb-4">
+          🇰🇪 Discover Kenya
+        </h1>
+        <p class="text-xl md:text-2xl font-light max-w-3xl mx-auto">
+          From the legendary Masai Mara to pristine beaches, Kenya offers unforgettable safari experiences and diverse landscapes
+        </p>
+      </div>
+    </section>
+
+    <!-- Destinations Grid -->
+    <section class="px-6 py-16">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-4xl font-serif text-ocean text-center mb-12">
+          Top Destinations in Kenya
+        </h2>
+        
+        <div class="space-y-8">
+          {kenyaDestinations.map((destination, index) => (
+            <div class="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+              <div class={`grid md:grid-cols-2 gap-6 ${index % 2 === 1 ? 'md:grid-flow-dense' : ''}`}>
+                <!-- Image -->
+                <div class={`h-64 md:h-auto overflow-hidden ${index % 2 === 1 ? 'md:col-start-2' : ''}`}>
+                  <img
+                    src={destination.image}
+                    alt={destination.name}
+                    class="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                
+                <!-- Content -->
+                <div class="p-8">
+                  <h3 class="text-3xl font-serif text-ocean mb-3">
+                    {destination.name}
+                  </h3>
+                  <p class="text-ocean/80 mb-4 leading-relaxed">
+                    {destination.description}
+                  </p>
+                  
+                  <!-- Highlights -->
+                  <div class="mb-4">
+                    <h4 class="font-bold text-teal mb-2">✨ Highlights:</h4>
+                    <div class="flex flex-wrap gap-2">
+                      {destination.highlights.map(highlight => (
+                        <span class="px-3 py-1 bg-sand text-ocean text-sm rounded-full">
+                          {highlight}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <!-- Best Time -->
+                  <div class="mb-4">
+                    <h4 class="font-bold text-teal mb-1">📅 Best Time to Visit:</h4>
+                    <p class="text-ocean/70">{destination.bestTime}</p>
+                  </div>
+                  
+                  <!-- Activities -->
+                  <div>
+                    <h4 class="font-bold text-teal mb-2">🎯 Activities:</h4>
+                    <div class="flex flex-wrap gap-2">
+                      {destination.activities.map(activity => (
+                        <span class="px-3 py-1 bg-teal/10 text-teal text-sm rounded-full">
+                          {activity}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- CTA Section -->
+        <div class="mt-16 text-center bg-white rounded-3xl shadow-lg p-12">
+          <h3 class="text-3xl font-serif text-ocean mb-4">
+            Ready to Explore Kenya?
+          </h3>
+          <p class="text-ocean/70 mb-6 max-w-2xl mx-auto">
+            Start planning your stress-free Kenyan adventure today. Our planner will help you organize every detail.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a 
+              href="/Planner" 
+              class="px-8 py-4 bg-teal text-white rounded-full hover:bg-coral hover:scale-105 transition-all duration-300 font-medium"
+            >
+              Start Planning Your Kenya Trip
+            </a>
+            <a 
+              href="/Destinations" 
+              class="px-8 py-4 bg-sand text-ocean rounded-full hover:bg-ocean hover:text-white transition-all duration-300 font-medium"
+            >
+              View All Destinations
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+

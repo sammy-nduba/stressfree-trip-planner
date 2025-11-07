@@ -1,0 +1,32 @@
+---
+// src/components/Testimonials.astro
+const testimonials = [
+  {
+    quote: "I used to dread planning. Now I just click and relax.",
+    author: "Sarah L., London",
+  },
+  {
+    quote: "The checklist saved me 3 hours. I arrived smiling.",
+    author: "James K., Sydney",
+  },
+  {
+    quote: "Best travel tool I’ve ever used. Pure calm.",
+    author: "Maria G., Barcelona",
+  },
+];
+---
+<section class="py-20 px-6 bg-teal/5">
+  <div class="max-w-4xl mx-auto">
+    <h2 class="text-4xl md:text-5xl font-serif text-center text-ocean mb-16">
+      What Calm Travelers Say
+    </h2>
+    <div class="space-y-12">
+      {testimonials.map((t) => (
+        <blockquote class="text-center italic text-lg text-ocean/80">
+          <p class="mb-4">“{t.quote}”</p>
+          <footer class="text-teal font-medium">— {t.author}</footer>
+        </blockquote>
+      ))}
+    </div>
+  </div>
+</section>

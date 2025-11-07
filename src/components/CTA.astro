@@ -1,0 +1,33 @@
+---
+// src/components/CTA.astro
+---
+<section id="start" class="py-20 px-6 bg-gradient-to-r from-teal to-coral text-white">
+  <div class="max-w-4xl mx-auto text-center">
+    <h2 class="text-4xl md:text-5xl font-serif mb-6">
+      Start Your Calm Journey
+    </h2>
+    <p class="text-lg mb-8 opacity-90">
+      Your stress-free holiday begins with one click.
+    </p>
+    <form
+      action="https://formspree.io/f/your-form-id"
+      method="POST"
+      class="max-w-md mx-auto flex gap-3"
+    >
+      <input
+        type="email"
+        name="email"
+        placeholder="you@calm.com"
+        required
+        class="flex-1 px-6 py-3 rounded-full text-ocean"
+      />
+      <button
+        type="submit"
+        class="px-8 py-3 bg-white text-teal rounded-full font-medium hover:bg-sand transition"
+      >
+        Get Started
+      </button>
+    </form>
+    <p class="mt-4 text-sm opacity-75">No spam. Only calm.</p>
+  </div>
+</section>
