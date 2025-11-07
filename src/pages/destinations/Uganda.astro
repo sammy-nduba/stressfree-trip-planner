@@ -1,0 +1,162 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const ugandaDestinations = [
+  {
+    name: "Bwindi Impenetrable National Park",
+    description: "Home to nearly half of the world's remaining mountain gorillas. Trek through ancient rainforest for an unforgettable encounter with these gentle giants in their natural habitat.",
+    highlights: ["Mountain Gorilla Trekking", "UNESCO World Heritage Site", "350+ Bird Species", "Ancient Rainforest"],
+    bestTime: "June to September, December to February",
+    activities: ["Gorilla Trekking", "Bird Watching", "Nature Walks", "Community Visits"],
+    image: "https://images.unsplash.com/photo-1551522435-a13afa10f103?w=800&h=600&fit=crop"
+  },
+  {
+    name: "Queen Elizabeth National Park",
+    description: "Uganda's most popular safari destination with diverse ecosystems from savannah to wetlands. Famous for tree-climbing lions and boat safaris on the Kazinga Channel.",
+    highlights: ["Tree-Climbing Lions", "Kazinga Channel", "Crater Lakes", "Diverse Wildlife"],
+    bestTime: "June to September, December to February",
+    activities: ["Game Drives", "Boat Safaris", "Chimpanzee Tracking", "Bird Watching"],
+    image: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&h=600&fit=crop"
+  },
+  {
+    name: "Murchison Falls National Park",
+    description: "Uganda's largest national park featuring the dramatic Murchison Falls where the Nile explodes through a narrow gorge. Excellent wildlife viewing and boat safaris.",
+    highlights: ["Murchison Falls", "Nile River Safaris", "Big Five Wildlife", "Shoebill Storks"],
+    bestTime: "December to February, June to September",
+    activities: ["Game Drives", "Boat Cruises", "Hiking to Falls", "Fishing"],
+    image: "https://images.unsplash.com/photo-1609198092357-c7a0c9c6d8d3?w=800&h=600&fit=crop"
+  },
+  {
+    name: "Kampala",
+    description: "Uganda's vibrant capital city built on seven hills. Experience bustling markets, historical sites, vibrant nightlife, and the cultural heart of Uganda.",
+    highlights: ["Kasubi Tombs", "Uganda Museum", "Ndere Cultural Centre", "Local Markets"],
+    bestTime: "Year-round",
+    activities: ["City Tours", "Cultural Experiences", "Shopping", "Nightlife"],
+    image: "https://images.unsplash.com/photo-1568632234157-ce7aecd03d0d?w=800&h=600&fit=crop"
+  },
+  {
+    name: "Lake Bunyonyi",
+    description: "One of Africa's most beautiful lakes, dotted with 29 islands. A perfect spot for relaxation, swimming, and canoeing in a bilharzia-free lake surrounded by terraced hills.",
+    highlights: ["29 Islands", "Swimming Safe", "Scenic Beauty", "Terraced Hillsides"],
+    bestTime: "Year-round",
+    activities: ["Canoeing", "Swimming", "Island Hopping", "Relaxation"],
+    image: "https://images.unsplash.com/photo-1621414050345-53db43f7e7ab?w=800&h=600&fit=crop"
+  },
+  {
+    name: "Kibale National Park",
+    description: "The primate capital of the world with 13 primate species including over 1,500 chimpanzees. Offers the best chimpanzee tracking experience in East Africa.",
+    highlights: ["Chimpanzee Tracking", "13 Primate Species", "Tropical Rainforest", "Bigodi Wetland"],
+    bestTime: "February to June, September to November",
+    activities: ["Chimp Tracking", "Primate Walks", "Bird Watching", "Nature Walks"],
+    image: "https://images.unsplash.com/photo-1540979388789-6cee28a1cdc9?w=800&h=600&fit=crop"
+  }
+];
+---
+
+<Layout title="Uganda Destinations - Stress-Free Holiday Makers">
+  <main class="pt-24 pb-20 bg-gradient-to-b from-sky to-sand">
+    <!-- Hero Section -->
+    <section class="px-6 py-16 bg-gradient-to-r from-teal to-ocean text-white">
+      <div class="max-w-6xl mx-auto text-center">
+        <h1 class="text-5xl md:text-6xl font-serif mb-4">
+          🇺🇬 Discover Uganda
+        </h1>
+        <p class="text-xl md:text-2xl font-light max-w-3xl mx-auto">
+          The Pearl of Africa - Experience mountain gorillas, pristine lakes, and lush landscapes in one of Africa's most beautiful countries
+        </p>
+      </div>
+    </section>
+
+    <!-- Destinations Grid -->
+    <section class="px-6 py-16">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-4xl font-serif text-ocean text-center mb-12">
+          Top Destinations in Uganda
+        </h2>
+        
+        <div class="space-y-8">
+          {ugandaDestinations.map((destination, index) => (
+            <div class="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+              <div class={`grid md:grid-cols-2 gap-6 ${index % 2 === 1 ? 'md:grid-flow-dense' : ''}`}>
+                <!-- Image -->
+                <div class={`h-64 md:h-auto overflow-hidden ${index % 2 === 1 ? 'md:col-start-2' : ''}`}>
+                  <img
+                    src={destination.image}
+                    alt={destination.name}
+                    class="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+                
+                <!-- Content -->
+                <div class="p-8">
+                  <h3 class="text-3xl font-serif text-ocean mb-3">
+                    {destination.name}
+                  </h3>
+                  <p class="text-ocean/80 mb-4 leading-relaxed">
+                    {destination.description}
+                  </p>
+                  
+                  <!-- Highlights -->
+                  <div class="mb-4">
+                    <h4 class="font-bold text-teal mb-2">✨ Highlights:</h4>
+                    <div class="flex flex-wrap gap-2">
+                      {destination.highlights.map(highlight => (
+                        <span class="px-3 py-1 bg-sand text-ocean text-sm rounded-full">
+                          {highlight}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <!-- Best Time -->
+                  <div class="mb-4">
+                    <h4 class="font-bold text-teal mb-1">📅 Best Time to Visit:</h4>
+                    <p class="text-ocean/70">{destination.bestTime}</p>
+                  </div>
+                  
+                  <!-- Activities -->
+                  <div>
+                    <h4 class="font-bold text-teal mb-2">🎯 Activities:</h4>
+                    <div class="flex flex-wrap gap-2">
+                      {destination.activities.map(activity => (
+                        <span class="px-3 py-1 bg-teal/10 text-teal text-sm rounded-full">
+                          {activity}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- CTA Section -->
+        <div class="mt-16 text-center bg-white rounded-3xl shadow-lg p-12">
+          <h3 class="text-3xl font-serif text-ocean mb-4">
+            Ready to Explore Uganda?
+          </h3>
+          <p class="text-ocean/70 mb-6 max-w-2xl mx-auto">
+            Start planning your stress-free Ugandan adventure today. Our planner will help you organize every detail.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a 
+              href="/Planner" 
+              class="px-8 py-4 bg-teal text-white rounded-full hover:bg-coral hover:scale-105 transition-all duration-300 font-medium"
+            >
+              Start Planning Your Uganda Trip
+            </a>
+            <a 
+              href="/Destinations" 
+              class="px-8 py-4 bg-sand text-ocean rounded-full hover:bg-ocean hover:text-white transition-all duration-300 font-medium"
+            >
+              View All Destinations
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
