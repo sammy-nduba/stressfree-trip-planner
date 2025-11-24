@@ -50,3 +50,25 @@ export async function getDestinationsByCountry(countryName: string) {
         activities: dest.activities || []
     }));
 }
+
+export async function getPackagesByCountry(countryName: string) {
+    const { data: country } = await supabase
+        .from('countries')
+        .select('id')
+        .eq('name', countryName)
+        .single();
+
+    if (!country) return [];
+
+    const { data: packages, error } = await supabase
+        .from('packages')
+        .select('*, destinations!inner(country_id)')
+        .eq('destinations.country_id', country.id);
+
+    if (error) {
+        console.error(`Error fetching packages for ${countryName}:`, error);
+        return [];
+    }
+
+    return packages;
+}

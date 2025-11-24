@@ -1,15 +1,17 @@
 ---
-import Layout from '../../../../layouts/Layout.astro';
-import { supabase } from '../../../../lib/supabase';
-import { createPaymentIntent } from '../../../../lib/stripe';
+import Layout from "../../../../layouts/Layout.astro";
+import { supabase } from "../../../../lib/supabase";
+import { createPaymentIntent } from "../../../../lib/stripe";
 
 // Server-side auth check
-const { data: { session } } = await supabase.auth.getSession();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 
 if (!session) {
   return new Response(null, {
     status: 302,
-    headers: { Location: '/auth/login' }
+    headers: { Location: "/auth/login" },
   });
 }
 
@@ -17,8 +19,9 @@ const { bookingId } = Astro.params;
 
 // Fetch booking with package details
 const { data: booking, error } = await supabase
-  .from('bookings')
-  .select(`
+  .from("bookings")
+  .select(
+    `
     *,
     packages (
       title,
@@ -27,28 +30,31 @@ const { data: booking, error } = await supabase
       duration_days,
       images
     )
-  `)
-  .eq('id', bookingId)
-  .eq('user_id', session.user.id)
+  `,
+  )
+  .eq("id", bookingId)
+  .eq("user_id", session.user.id)
   .single();
 
 if (error || !booking) {
-  return Astro.redirect('/dashboard');
+  return Astro.redirect("/dashboard");
 }
 
 // Create payment intent
-let clientSecret = '';
+let clientSecret = "";
 try {
   const response = await createPaymentIntent(booking.total_price, bookingId);
   clientSecret = response.client_secret;
 } catch (error) {
-  console.error('Payment intent creation failed:', error);
+  console.error("Payment intent creation failed:", error);
   // Redirect back to booking with error
-  return Astro.redirect(`/packages/book/${booking.package_id}?error=payment_failed`);
+  return Astro.redirect(
+    `/packages/book/${booking.package_id || ""}?error=payment_failed`,
+  );
 }
 ---
 
-<Layout title="Complete Payment - Stress-Free Holiday Makers`}>
+<Layout title="Complete Payment - Stress-Free Holiday Makers">
   <section class="pt-24 pb-20 bg-gradient-to-b from-sky to-white min-h-screen">
     <div class="max-w-4xl mx-auto px-6">
       <!-- Header -->
@@ -67,7 +73,12 @@ try {
           <h2 class="text-2xl font-serif text-ocean mb-6">Payment Details</h2>
 
           <!-- Stripe Elements will be mounted here -->
-          <div id="payment-element" class="mb-6"></div>
+          <div
+            id="payment-element"
+            class="mb-6"
+            data-client-secret={clientSecret}
+          >
+          </div>
 
           <!-- Error messages -->
           <div id="payment-message" class="hidden text-red-600 mb-4"></div>
@@ -80,7 +91,11 @@ try {
               class="w-full py-4 bg-teal text-white rounded-xl font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span id="button-text">Pay ${booking.total_price}</span>
-              <div id="spinner" class="hidden inline-block ml-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <div
+                id="spinner"
+                class="hidden inline-block ml-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+              >
+              </div>
             </button>
 
             <a
@@ -96,32 +111,52 @@ try {
         <div class="space-y-6">
           <!-- Package Card -->
           <div class="bg-white rounded-3xl shadow-lg overflow-hidden">
-            {booking.packages.images && booking.packages.images.length > 0 && (
-              <div class="aspect-video">
-                <img
-                  src={booking.packages.images[0]}
-                  alt={booking.packages.title}
-                  class="w-full h-full object-cover"
-                />
-              </div>
-            )}
+            {
+              booking.packages.images && booking.packages.images.length > 0 && (
+                <div class="aspect-video">
+                  <img
+                    src={booking.packages.images[0]}
+                    alt={booking.packages.title}
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+              )
+            }
             <div class="p-6">
-              <h3 class="text-2xl font-serif text-ocean mb-2">{booking.packages.title}</h3>
-              <p class="text-ocean/70 mb-4">{booking.packages.destination} • {booking.packages.duration_days} days</p>
+              <h3 class="text-2xl font-serif text-ocean mb-2">
+                {booking.packages.title}
+              </h3>
+              <p class="text-ocean/70 mb-4">
+                {booking.packages.destination} • {
+                  booking.packages.duration_days
+                } days
+              </p>
 
               <div class="space-y-3">
                 <div class="flex justify-between">
                   <span class="text-ocean/70">Travel Dates</span>
                   <span class="font-semibold">
-                    {new Date(booking.travel_dates.start_date).toLocaleDateString()} -
-                    {new Date(booking.travel_dates.end_date).toLocaleDateString()}
+                    {
+                      new Date(
+                        booking.travel_dates.start_date,
+                      ).toLocaleDateString()
+                    } -
+                    {
+                      new Date(
+                        booking.travel_dates.end_date,
+                      ).toLocaleDateString()
+                    }
                   </span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-ocean/70">Travelers</span>
                   <span class="font-semibold">
-                    {booking.participants.adults} adult{booking.participants.adults !== 1 ? 's' : ''},
-                    {booking.participants.children} child{booking.participants.children !== 1 ? 'ren' : ''}
+                    {booking.participants.adults} adult{
+                      booking.participants.adults !== 1 ? "s" : ""
+                    },
+                    {booking.participants.children} child{
+                      booking.participants.children !== 1 ? "ren" : ""
+                    }
                   </span>
                 </div>
                 <hr class="border-gray-200" />
@@ -135,7 +170,9 @@ try {
 
           <!-- Payment Security -->
           <div class="bg-white rounded-3xl shadow-lg p-6">
-            <h3 class="text-lg font-serif text-ocean mb-4">🔒 Secure Payment</h3>
+            <h3 class="text-lg font-serif text-ocean mb-4">
+              🔒 Secure Payment
+            </h3>
             <div class="space-y-2">
               <div class="flex items-center gap-3">
                 <span class="text-green-500">✓</span>
@@ -162,47 +199,57 @@ try {
 </Layout>
 
 <script>
-  import { loadStripe } from '@stripe/stripe-js';
-  import { supabase } from '../../../lib/supabase';
+  import { loadStripe } from "@stripe/stripe-js";
+  import { supabase } from "../../../../lib/supabase";
 
   // Initialize Stripe payment form
   async function initializePayment() {
-    const stripePublishableKey = '{import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY}';
+    const stripePublishableKey = import.meta.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
     const stripe = await loadStripe(stripePublishableKey);
-    const clientSecret = '{clientSecret}';
+
+    const paymentElementDiv = document.getElementById("payment-element");
+    const clientSecret = paymentElementDiv?.dataset.clientSecret;
+
+    if (!clientSecret) {
+      console.error("Missing client secret");
+      return;
+    }
 
     if (!stripe) {
-      const messageElement = document.getElementById('payment-message');
+      const messageElement = document.getElementById("payment-message");
       if (messageElement) {
-        messageElement.textContent = 'Stripe failed to load. Please refresh the page.';
-        messageElement.classList.remove('hidden');
+        messageElement.textContent =
+          "Stripe failed to load. Please refresh the page.";
+        messageElement.classList.remove("hidden");
       }
       return;
     }
 
     const elements = stripe.elements();
-    const paymentElement = elements.create('payment');
-    paymentElement.mount('#payment-element');
+    const paymentElement = elements.create("payment");
+    paymentElement.mount("#payment-element");
 
-    const paymentButton = document.getElementById('submit-payment');
-    const buttonText = document.getElementById('button-text');
-    const spinner = document.getElementById('spinner');
-    const messageElement = document.getElementById('payment-message');
+    const paymentButton = document.getElementById(
+      "submit-payment",
+    ) as HTMLButtonElement;
+    const buttonText = document.getElementById("button-text");
+    const spinner = document.getElementById("spinner");
+    const messageElement = document.getElementById("payment-message");
 
-    paymentElement.on('ready', () => {
+    paymentElement.on("ready", () => {
       if (paymentButton) {
         paymentButton.disabled = false;
       }
     });
 
     if (paymentButton) {
-      paymentButton.addEventListener('click', async (e) => {
+      paymentButton.addEventListener("click", async (e) => {
         e.preventDefault();
 
         paymentButton.disabled = true;
-        if (buttonText) buttonText.classList.add('hidden');
-        if (spinner) spinner.classList.remove('hidden');
-        if (messageElement) messageElement.classList.add('hidden');
+        if (buttonText) buttonText.classList.add("hidden");
+        if (spinner) spinner.classList.remove("hidden");
+        if (messageElement) messageElement.classList.add("hidden");
 
         try {
           const { error } = await stripe.confirmPayment({
@@ -214,28 +261,28 @@ try {
 
           if (error) {
             if (messageElement) {
-              messageElement.textContent = error.message || 'Payment failed';
-              messageElement.classList.remove('hidden');
+              messageElement.textContent = error.message || "Payment failed";
+              messageElement.classList.remove("hidden");
             }
             throw error;
           }
 
           // Payment succeeded - redirect will happen automatically
         } catch (error) {
-          console.error('Payment failed:', error);
+          console.error("Payment failed:", error);
           if (messageElement) {
-            messageElement.textContent = 'Payment failed. Please try again.';
-            messageElement.classList.remove('hidden');
+            messageElement.textContent = "Payment failed. Please try again.";
+            messageElement.classList.remove("hidden");
           }
         } finally {
           paymentButton.disabled = false;
-          if (buttonText) buttonText.classList.remove('hidden');
-          if (spinner) spinner.classList.add('hidden');
+          if (buttonText) buttonText.classList.remove("hidden");
+          if (spinner) spinner.classList.add("hidden");
         }
       });
     }
   }
 
   // Initialize when DOM is ready
-  document.addEventListener('DOMContentLoaded', initializePayment);
+  document.addEventListener("DOMContentLoaded", initializePayment);
 </script>

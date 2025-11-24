@@ -11,7 +11,29 @@ if (Astro.request.method === "POST") {
         const price = formData.get("price");
         const duration = formData.get("duration");
         const destination_id = formData.get("destination_id");
-        const image_url = formData.get("image_url");
+        const imageFile = formData.get("image") as File;
+
+        let image_url = "";
+
+        if (imageFile && imageFile.size > 0) {
+            const fileExt = imageFile.name.split(".").pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const { error: uploadError } = await supabase.storage
+                .from("packages")
+                .upload(fileName, imageFile);
+
+            if (uploadError) throw uploadError;
+
+            const {
+                data: { publicUrl },
+            } = supabase.storage.from("packages").getPublicUrl(fileName);
+
+            image_url = publicUrl;
+        } else {
+            // Fallback if they somehow bypassed the required check or if we want to allow URL input as backup (not implemented here)
+            throw new Error("Image is required");
+        }
+
         const highlights = formData
             .get("highlights")
             ?.toString()
@@ -52,6 +74,12 @@ if (Astro.request.method === "POST") {
 // Fetch destinations for the dropdown
 const { data: destinations } = await supabase
     .from("destinations")
+    .select("id, name, country_id")
+    .order("name");
+
+// Fetch countries for the dropdown
+const { data: countries } = await supabase
+    .from("countries")
     .select("id, name")
     .order("name");
 ---
@@ -68,7 +96,11 @@ const { data: destinations } = await supabase
             </a>
         </div>
 
-        <form method="POST" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            class="bg-white rounded-xl shadow-lg p-8 space-y-6"
+        >
             <!-- Basic Info -->
             <div class="grid md:grid-cols-2 gap-6">
                 <div class="space-y-2">
@@ -89,6 +121,28 @@ const { data: destinations } = await supabase
 
                 <div class="space-y-2">
                     <label
+                        for="country_id"
+                        class="block text-sm font-medium text-gray-700"
+                        >Country</label
+                    >
+                    <select
+                        id="country_id"
+                        name="country_id"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                    >
+                        <option value="">Select a country...</option>
+                        {
+                            countries?.map((country) => (
+                                <option value={country.id}>
+                                    {country.name}
+                                </option>
+                            ))
+                        }
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label
                         for="destination_id"
                         class="block text-sm font-medium text-gray-700"
                         >Destination</label
@@ -97,12 +151,19 @@ const { data: destinations } = await supabase
                         id="destination_id"
                         name="destination_id"
                         required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                        disabled
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                     >
-                        <option value="">Select a destination...</option>
+                        <option value="">Select a country first...</option>
                         {
                             destinations?.map((dest) => (
-                                <option value={dest.id}>{dest.name}</option>
+                                <option
+                                    value={dest.id}
+                                    data-country-id={dest.country_id}
+                                    class="hidden destination-option"
+                                >
+                                    {dest.name}
+                                </option>
                             ))
                         }
                     </select>
@@ -176,18 +237,21 @@ const { data: destinations } = await supabase
 
             <div class="space-y-2">
                 <label
-                    for="image_url"
+                    for="image"
                     class="block text-sm font-medium text-gray-700"
-                    >Image URL</label
+                    >Package Image</label
                 >
                 <input
-                    type="url"
-                    id="image_url"
-                    name="image_url"
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/*"
                     required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
-                    placeholder="https://example.com/image.jpg"
                 />
+                <p class="text-sm text-gray-500">
+                    Upload a high-quality image for the package.
+                </p>
             </div>
 
             <!-- Lists -->
@@ -260,3 +324,41 @@ Personal Expenses"></textarea>
         </form>
     </div>
 </AdminLayout>
+
+<script>
+    const countrySelect = document.getElementById(
+        "country_id",
+    ) as HTMLSelectElement;
+    const destinationSelect = document.getElementById(
+        "destination_id",
+    ) as HTMLSelectElement;
+    const destinationOptions = document.querySelectorAll(".destination-option");
+
+    countrySelect?.addEventListener("change", (e) => {
+        const selectedCountryId = (e.target as HTMLSelectElement).value;
+
+        // Reset destination selection
+        destinationSelect.value = "";
+
+        if (!selectedCountryId) {
+            destinationSelect.disabled = true;
+            destinationSelect.innerHTML =
+                '<option value="">Select a country first...</option>';
+            return;
+        }
+
+        destinationSelect.disabled = false;
+        destinationSelect.innerHTML =
+            '<option value="">Select a destination...</option>';
+
+        // Filter options
+        destinationOptions.forEach((option) => {
+            const opt = option as HTMLOptionElement;
+            if (opt.dataset.countryId === selectedCountryId) {
+                const clone = opt.cloneNode(true) as HTMLOptionElement;
+                clone.classList.remove("hidden");
+                destinationSelect.appendChild(clone);
+            }
+        });
+    });
+</script>
