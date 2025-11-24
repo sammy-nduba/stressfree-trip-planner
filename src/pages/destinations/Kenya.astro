@@ -1,56 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { getDestinationsByCountry } from '../../lib/api';
 
-const kenyaDestinations = [
-  {
-    name: "Masai Mara National Reserve",
-    description: "World-famous for the Great Migration, witness millions of wildebeest and zebras crossing the plains. Home to the Big Five and incredible wildlife viewing year-round.",
-    highlights: ["Great Migration (July-October)", "Big Five Safari", "Hot Air Balloon Rides", "Maasai Cultural Visits"],
-    bestTime: "July to October",
-    activities: ["Game Drives", "Photography", "Cultural Tours", "Balloon Safaris"],
-    image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&h=600&fit=crop"
-  },
-  {
-    name: "Amboseli National Park",
-    description: "Famous for its large elephant herds and stunning views of Mount Kilimanjaro. One of the best places in Africa to get close to free-ranging elephants.",
-    highlights: ["Mount Kilimanjaro Views", "Elephant Herds", "Birdwatching", "Maasai Communities"],
-    bestTime: "June to October, January to February",
-    activities: ["Wildlife Photography", "Game Drives", "Bird Watching", "Nature Walks"],
-    image: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=800&h=600&fit=crop"
-  },
-  {
-    name: "Nairobi",
-    description: "Kenya's vibrant capital city blending modern urban life with wildlife experiences. Visit the Giraffe Centre, David Sheldrick Elephant Orphanage, and Nairobi National Park.",
-    highlights: ["Giraffe Centre", "Elephant Orphanage", "Nairobi National Park", "Karen Blixen Museum"],
-    bestTime: "Year-round",
-    activities: ["City Tours", "Wildlife Sanctuaries", "Shopping", "Dining"],
-    image: "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=600&fit=crop"
-  },
-  {
-    name: "Diani Beach",
-    description: "Pristine white sand beaches along the Indian Ocean with crystal-clear turquoise waters. Perfect for relaxation, water sports, and marine life encounters.",
-    highlights: ["White Sand Beaches", "Coral Reefs", "Kite Surfing", "Colobus Monkeys"],
-    bestTime: "December to March, July to October",
-    activities: ["Snorkeling", "Diving", "Beach Relaxation", "Water Sports"],
-    image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop"
-  },
-  {
-    name: "Lake Nakuru National Park",
-    description: "Famous for its flamingo populations and rhino sanctuary. A compact park offering excellent wildlife viewing including lions, leopards, and both black and white rhinos.",
-    highlights: ["Flamingo Flocks", "Rhino Sanctuary", "Leopard Sightings", "Scenic Viewpoints"],
-    bestTime: "Year-round",
-    activities: ["Game Drives", "Bird Watching", "Photography", "Picnics"],
-    image: "https://images.unsplash.com/photo-1568454537842-d933259bb258?w=800&h=600&fit=crop"
-  },
-  {
-    name: "Tsavo National Parks",
-    description: "Kenya's largest national park, divided into Tsavo East and West. Known for red elephants, diverse landscapes, and the legendary man-eating lions of Tsavo.",
-    highlights: ["Red Elephants", "Mzima Springs", "Lugard Falls", "Vast Wilderness"],
-    bestTime: "June to October, January to February",
-    activities: ["Game Drives", "Wildlife Viewing", "Photography", "Camping"],
-    image: "https://images.unsplash.com/photo-1549366021-9f761d450615?w=800&h=600&fit=crop"
-  }
-];
+const kenyaDestinations = await getDestinationsByCountry('Kenya');
 ---
 
 <Layout title="Kenya Destinations - Stress-Free Holiday Makers">
@@ -159,4 +111,3 @@ const kenyaDestinations = [
     </section>
   </main>
 </Layout>
-

@@ -10,8 +10,19 @@ export default function PlannerReact() {
 		children: 0,
 		budget: '',
 		travelStyle: '',
-		interests: []
+		interests: [],
+		contactName: '',
+		contactEmail: '',
+		contactPhone: '',
+		additionalNotes: ''
 	});
+
+	// Submission State
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitStatus, setSubmitStatus] = useState(null); // null, 'success', 'error'
+	const [submitMessage, setSubmitMessage] = useState('');
+	const [validationErrors, setValidationErrors] = useState({});
+
 
 	// Checklist State
 	const [steps, setSteps] = useState([
@@ -39,6 +50,14 @@ export default function PlannerReact() {
 
 	const handleDetailChange = (field, value) => {
 		setTravelDetails(prev => ({ ...prev, [field]: value }));
+		// Clear error when user types
+		if (validationErrors[field]) {
+			setValidationErrors(prev => {
+				const newErrors = { ...prev };
+				delete newErrors[field];
+				return newErrors;
+			});
+		}
 	};
 
 	const handleInterestToggle = (interest) => {
@@ -48,6 +67,108 @@ export default function PlannerReact() {
 				? prev.interests.filter(i => i !== interest)
 				: [...prev.interests, interest]
 		}));
+	};
+
+	const validateForm = () => {
+		const errors = {};
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+
+		if (travelDetails.startDate) {
+			const start = new Date(travelDetails.startDate);
+			if (start < today) {
+				errors.startDate = "Start date cannot be in the past";
+			}
+		}
+
+		if (travelDetails.startDate && travelDetails.endDate) {
+			const start = new Date(travelDetails.startDate);
+			const end = new Date(travelDetails.endDate);
+			if (end < start) {
+				errors.endDate = "End date must be after start date";
+			}
+		}
+
+		if (travelDetails.contactPhone) {
+			// Basic phone validation (allows +, spaces, dashes, parentheses, and digits)
+			const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im;
+			if (!phoneRegex.test(travelDetails.contactPhone)) {
+				errors.contactPhone = "Please enter a valid phone number";
+			}
+		}
+
+		setValidationErrors(errors);
+		return Object.keys(errors).length === 0;
+	};
+
+	const handleSubmit = async () => {
+		if (!validateForm()) {
+			setSubmitStatus('error');
+			setSubmitMessage('Please fix the errors in the form before submitting.');
+			return;
+		}
+
+		setIsSubmitting(true);
+		setSubmitStatus(null);
+		setSubmitMessage('');
+
+		try {
+			const response = await fetch('/api/trip-requests', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					destination: travelDetails.destination,
+					start_date: travelDetails.startDate,
+					end_date: travelDetails.endDate,
+					adults: travelDetails.adults,
+					children: travelDetails.children,
+					budget: travelDetails.budget,
+					travel_style: travelDetails.travelStyle,
+					interests: travelDetails.interests,
+					contact_name: travelDetails.contactName,
+					contact_email: travelDetails.contactEmail,
+					contact_phone: travelDetails.contactPhone,
+					additional_notes: travelDetails.additionalNotes
+				})
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				setSubmitStatus('success');
+				// No reload, just show success view
+			} else {
+				setSubmitStatus('error');
+				setSubmitMessage(data.error || 'Failed to submit request. Please try again.');
+			}
+		} catch (error) {
+			setSubmitStatus('error');
+			setSubmitMessage('An error occurred. Please check your connection and try again.');
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
+	const resetForm = () => {
+		setTravelDetails({
+			destination: '',
+			startDate: '',
+			endDate: '',
+			adults: 2,
+			children: 0,
+			budget: '',
+			travelStyle: '',
+			interests: [],
+			contactName: '',
+			contactEmail: '',
+			contactPhone: '',
+			additionalNotes: ''
+		});
+		setSubmitStatus(null);
+		setCurrentStep(1);
+		setValidationErrors({});
 	};
 
 	const addStep = () => {
@@ -68,7 +189,42 @@ export default function PlannerReact() {
 	const completedCount = steps.filter(s => s.done).length;
 	const progress = steps.length > 0 ? (completedCount / steps.length) * 100 : 0;
 
-	const isDetailsComplete = travelDetails.destination && travelDetails.startDate && travelDetails.endDate;
+	const isDetailsComplete = travelDetails.destination && travelDetails.startDate && travelDetails.endDate && travelDetails.contactName && travelDetails.contactEmail;
+
+
+	if (submitStatus === 'success') {
+		return (
+			<div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-lg p-12 text-center">
+				<div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+					<span className="text-5xl">✨</span>
+				</div>
+				<h3 className="text-4xl font-['Playfair_Display'] text-[#006064] mb-4">
+					Trip Request Received!
+				</h3>
+				<p className="text-xl text-[#006064]/70 mb-8">
+					Thank you, <strong>{travelDetails.contactName}</strong>! We've received your request for a trip to <strong>{travelDetails.destination}</strong>.
+				</p>
+				<div className="bg-[#E0F7FA] p-6 rounded-xl mb-8 text-left max-w-md mx-auto">
+					<p className="text-[#006064] mb-2">We will review your details and get back to you at <strong>{travelDetails.contactEmail}</strong> shortly with a custom quote.</p>
+					<p className="text-[#006064] text-sm">Reference ID: #{Math.floor(Math.random() * 10000)}</p>
+				</div>
+				<div className="flex gap-4 justify-center">
+					<button
+						onClick={resetForm}
+						className="px-8 py-3 bg-[#26A69A] text-white rounded-full hover:bg-[#1F8B7F] transition-colors font-medium"
+					>
+						Plan Another Trip
+					</button>
+					<a
+						href="/"
+						className="px-8 py-3 border-2 border-[#26A69A] text-[#26A69A] rounded-full hover:bg-[#E0F7FA] transition-colors font-medium"
+					>
+						Back to Home
+					</a>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="max-w-5xl mx-auto">
@@ -127,8 +283,9 @@ export default function PlannerReact() {
 									type="date"
 									value={travelDetails.startDate}
 									onChange={(e) => handleDetailChange('startDate', e.target.value)}
-									className="w-full px-4 py-3 rounded-xl border border-[#E0F7FA] focus:outline-none focus:ring-2 focus:ring-[#26A69A] bg-[#FFF8E1]"
+									className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 bg-[#FFF8E1] ${validationErrors.startDate ? 'border-red-500 focus:ring-red-200' : 'border-[#E0F7FA] focus:ring-[#26A69A]'}`}
 								/>
+								{validationErrors.startDate && <p className="text-red-500 text-sm mt-1">{validationErrors.startDate}</p>}
 							</div>
 							<div>
 								<label className="block text-[#006064] font-medium mb-2">
@@ -138,8 +295,9 @@ export default function PlannerReact() {
 									type="date"
 									value={travelDetails.endDate}
 									onChange={(e) => handleDetailChange('endDate', e.target.value)}
-									className="w-full px-4 py-3 rounded-xl border border-[#E0F7FA] focus:outline-none focus:ring-2 focus:ring-[#26A69A] bg-[#FFF8E1]"
+									className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 bg-[#FFF8E1] ${validationErrors.endDate ? 'border-red-500 focus:ring-red-200' : 'border-[#E0F7FA] focus:ring-[#26A69A]'}`}
 								/>
+								{validationErrors.endDate && <p className="text-red-500 text-sm mt-1">{validationErrors.endDate}</p>}
 							</div>
 						</div>
 
@@ -221,6 +379,56 @@ export default function PlannerReact() {
 							</select>
 						</div>
 
+						{/* Contact Information */}
+						<div className="border-t border-[#E0F7FA] pt-6 mt-6">
+							<h4 className="text-xl font-['Playfair_Display'] text-[#006064] mb-4">Contact Information</h4>
+
+							<div className="space-y-4">
+								{/* Contact Name */}
+								<div>
+									<label className="block text-[#006064] font-medium mb-2">
+										Your Name <span className="text-[#FF8A65]">*</span>
+									</label>
+									<input
+										type="text"
+										value={travelDetails.contactName}
+										onChange={(e) => handleDetailChange('contactName', e.target.value)}
+										placeholder="John Doe"
+										className="w-full px-4 py-3 rounded-xl border border-[#E0F7FA] focus:outline-none focus:ring-2 focus:ring-[#26A69A] bg-[#FFF8E1]"
+									/>
+								</div>
+
+								{/* Contact Email */}
+								<div>
+									<label className="block text-[#006064] font-medium mb-2">
+										Email Address <span className="text-[#FF8A65]">*</span>
+									</label>
+									<input
+										type="email"
+										value={travelDetails.contactEmail}
+										onChange={(e) => handleDetailChange('contactEmail', e.target.value)}
+										placeholder="john@example.com"
+										className="w-full px-4 py-3 rounded-xl border border-[#E0F7FA] focus:outline-none focus:ring-2 focus:ring-[#26A69A] bg-[#FFF8E1]"
+									/>
+								</div>
+
+								{/* Contact Phone */}
+								<div>
+									<label className="block text-[#006064] font-medium mb-2">
+										Phone Number (Optional)
+									</label>
+									<input
+										type="tel"
+										value={travelDetails.contactPhone}
+										onChange={(e) => handleDetailChange('contactPhone', e.target.value)}
+										placeholder="+254 700 000000"
+										className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 bg-[#FFF8E1] ${validationErrors.contactPhone ? 'border-red-500 focus:ring-red-200' : 'border-[#E0F7FA] focus:ring-[#26A69A]'}`}
+									/>
+									{validationErrors.contactPhone && <p className="text-red-500 text-sm mt-1">{validationErrors.contactPhone}</p>}
+								</div>
+							</div>
+						</div>
+
 						{/* Interests */}
 						<div>
 							<label className="block text-[#006064] font-medium mb-2">
@@ -231,11 +439,10 @@ export default function PlannerReact() {
 									<button
 										key={interest}
 										onClick={() => handleInterestToggle(interest)}
-										className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-											travelDetails.interests.includes(interest)
-												? 'bg-[#26A69A] text-white'
-												: 'bg-[#E0F7FA] text-[#006064] hover:bg-[#26A69A] hover:text-white'
-										}`}
+										className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${travelDetails.interests.includes(interest)
+											? 'bg-[#26A69A] text-white'
+											: 'bg-[#E0F7FA] text-[#006064] hover:bg-[#26A69A] hover:text-white'
+											}`}
 									>
 										{interest}
 									</button>
@@ -261,13 +468,16 @@ export default function PlannerReact() {
 
 					{/* Next Button */}
 					<button
-						onClick={() => setCurrentStep(2)}
+						onClick={() => {
+							if (validateForm()) {
+								setCurrentStep(2);
+							}
+						}}
 						disabled={!isDetailsComplete}
-						className={`w-full mt-8 px-6 py-4 rounded-full font-medium transition-all ${
-							isDetailsComplete
-								? 'bg-[#26A69A] text-white hover:bg-[#1F8B7F] hover:scale-105'
-								: 'bg-[#E0F7FA] text-[#006064]/50 cursor-not-allowed'
-						}`}
+						className={`w-full mt-8 px-6 py-4 rounded-full font-medium transition-all ${isDetailsComplete
+							? 'bg-[#26A69A] text-white hover:bg-[#1F8B7F] hover:scale-105'
+							: 'bg-[#E0F7FA] text-[#006064]/50 cursor-not-allowed'
+							}`}
 					>
 						Continue to Planning Checklist →
 					</button>
@@ -314,11 +524,10 @@ export default function PlannerReact() {
 									className="w-5 h-5 cursor-pointer rounded accent-[#26A69A]"
 								/>
 								<span
-									className={`flex-1 ${
-										step.done
-											? 'line-through text-[#006064]/50'
-											: 'text-[#006064]'
-									}`}
+									className={`flex-1 ${step.done
+										? 'line-through text-[#006064]/50'
+										: 'text-[#006064]'
+										}`}
 								>
 									{step.label}
 								</span>
@@ -349,8 +558,25 @@ export default function PlannerReact() {
 						</button>
 					</div>
 
-					<button className="w-full px-6 py-4 bg-[#FF8A65] text-white rounded-full hover:bg-[#E67E50] transition-colors font-medium">
-						Download My Itinerary
+					{/* Success/Error Messages */}
+					{submitStatus && submitStatus !== 'success' && (
+						<div className="mt-6 p-4 rounded-xl bg-red-50 border-2 border-red-500 text-red-800">
+							<p className="font-medium flex items-center gap-2">
+								✗ {submitMessage}
+							</p>
+						</div>
+					)}
+
+					{/* Submit Request Button */}
+					<button
+						onClick={handleSubmit}
+						disabled={isSubmitting}
+						className={`w-full px-6 py-4 rounded-full font-medium transition-all ${isSubmitting
+							? 'bg-gray-400 text-white cursor-not-allowed'
+							: 'bg-[#FF8A65] text-white hover:bg-[#E67E50] hover:scale-105'
+							}`}
+					>
+						{isSubmitting ? 'Submitting...' : 'Submit Trip Request'}
 					</button>
 				</div>
 			)}

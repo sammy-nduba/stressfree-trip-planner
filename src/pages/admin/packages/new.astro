@@ -1,0 +1,262 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { supabase } from "../../../lib/supabase";
+
+// Handle form submission
+if (Astro.request.method === "POST") {
+    try {
+        const formData = await Astro.request.formData();
+        const title = formData.get("title");
+        const description = formData.get("description");
+        const price = formData.get("price");
+        const duration = formData.get("duration");
+        const destination_id = formData.get("destination_id");
+        const image_url = formData.get("image_url");
+        const highlights = formData
+            .get("highlights")
+            ?.toString()
+            .split("\n")
+            .filter((h) => h.trim());
+        const included = formData
+            .get("included")
+            ?.toString()
+            .split("\n")
+            .filter((i) => i.trim());
+        const not_included = formData
+            .get("not_included")
+            ?.toString()
+            .split("\n")
+            .filter((i) => i.trim());
+
+        const { error } = await supabase.from("packages").insert({
+            title,
+            description,
+            price: parseFloat(price?.toString() || "0"),
+            duration,
+            destination_id,
+            image_url,
+            highlights,
+            included,
+            not_included,
+            is_featured: formData.get("is_featured") === "on",
+        });
+
+        if (error) throw error;
+
+        return Astro.redirect("/admin/packages");
+    } catch (error) {
+        console.error("Error creating package:", error);
+    }
+}
+
+// Fetch destinations for the dropdown
+const { data: destinations } = await supabase
+    .from("destinations")
+    .select("id, name")
+    .order("name");
+---
+
+<AdminLayout title="Create Package">
+    <div class="max-w-3xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Create New Package</h1>
+            <a
+                href="/admin/packages"
+                class="text-gray-600 hover:text-gray-800 font-medium"
+            >
+                Cancel
+            </a>
+        </div>
+
+        <form method="POST" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+            <!-- Basic Info -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label
+                        for="title"
+                        class="block text-sm font-medium text-gray-700"
+                        >Package Title</label
+                    >
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                        placeholder="e.g., Magical Maldives"
+                    />
+                </div>
+
+                <div class="space-y-2">
+                    <label
+                        for="destination_id"
+                        class="block text-sm font-medium text-gray-700"
+                        >Destination</label
+                    >
+                    <select
+                        id="destination_id"
+                        name="destination_id"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                    >
+                        <option value="">Select a destination...</option>
+                        {
+                            destinations?.map((dest) => (
+                                <option value={dest.id}>{dest.name}</option>
+                            ))
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label
+                    for="description"
+                    class="block text-sm font-medium text-gray-700"
+                    >Description</label
+                >
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="4"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                    placeholder="Detailed description of the package..."
+                ></textarea>
+            </div>
+
+            <!-- Details -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="space-y-2">
+                    <label
+                        for="price"
+                        class="block text-sm font-medium text-gray-700"
+                        >Price ($)</label
+                    >
+                    <input
+                        type="number"
+                        id="price"
+                        name="price"
+                        min="0"
+                        step="0.01"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                    />
+                </div>
+
+                <div class="space-y-2">
+                    <label
+                        for="duration"
+                        class="block text-sm font-medium text-gray-700"
+                        >Duration</label
+                    >
+                    <input
+                        type="text"
+                        id="duration"
+                        name="duration"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                        placeholder="e.g., 5 Days / 4 Nights"
+                    />
+                </div>
+
+                <div class="flex items-center pt-8">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="is_featured"
+                            class="w-5 h-5 text-teal rounded focus:ring-teal"
+                        />
+                        <span class="text-sm font-medium text-gray-700"
+                            >Feature on Homepage</span
+                        >
+                    </label>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label
+                    for="image_url"
+                    class="block text-sm font-medium text-gray-700"
+                    >Image URL</label
+                >
+                <input
+                    type="url"
+                    id="image_url"
+                    name="image_url"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                    placeholder="https://example.com/image.jpg"
+                />
+            </div>
+
+            <!-- Lists -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="space-y-2">
+                    <label
+                        for="highlights"
+                        class="block text-sm font-medium text-gray-700"
+                        >Highlights (One per line)</label
+                    >
+                    <textarea
+                        id="highlights"
+                        name="highlights"
+                        rows="6"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                        placeholder="Sunset Cruise
+City Tour
+Beach Dinner"
+                    ></textarea>
+                </div>
+
+                <div class="space-y-2">
+                    <label
+                        for="included"
+                        class="block text-sm font-medium text-gray-700"
+                        >Included (One per line)</label
+                    >
+                    <textarea
+                        id="included"
+                        name="included"
+                        rows="6"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                        placeholder="Accommodation
+Breakfast
+Transfers"
+                    ></textarea>
+                </div>
+
+                <div class="space-y-2">
+                    <label
+                        for="not_included"
+                        class="block text-sm font-medium text-gray-700"
+                        >Not Included (One per line)</label
+                    >
+                    <textarea
+                        id="not_included"
+                        name="not_included"
+                        rows="6"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                        placeholder="Flights
+Visa
+Personal Expenses"></textarea>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-gray-200 flex justify-end gap-4">
+                <a
+                    href="/admin/packages"
+                    class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                >
+                    Cancel
+                </a>
+                <button
+                    type="submit"
+                    class="px-6 py-2 bg-teal text-white rounded-lg hover:bg-teal/90 font-medium transition-colors"
+                >
+                    Create Package
+                </button>
+            </div>
+        </form>
+    </div>
+</AdminLayout>

@@ -1,0 +1,14 @@
+---
+// In the request quote model, there's no user dashboard
+// Only admin users should access this, so redirect to admin panel
+import { isAdmin } from "../lib/auth";
+
+const admin = await isAdmin();
+
+if (admin) {
+  return Astro.redirect("/admin");
+} else {
+  // Non-admin users don't have a dashboard - redirect to home
+  return Astro.redirect("/");
+}
+---

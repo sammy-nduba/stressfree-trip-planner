@@ -1,50 +1,61 @@
-<<<<<<< HEAD
-# Astro Starter Kit: Basics
+# Stress-Free Trip Planner
 
+A modern travel planning platform built with Astro, React, and Supabase. This application allows users to browse destinations, explore travel packages, and submit trip requests. Administrators can manage content and handle customer inquiries through a dedicated admin panel.
+
+## Features
+
+### Public Features (No Authentication Required)
+- 🌍 Browse destinations across Kenya, Uganda, Tanzania, and more
+- 📦 Explore curated travel packages
+- 📝 Interactive trip planner with checklist
+- 💬 Request quotes for custom trips
+- 📱 Fully responsive design
+
+### Admin Features (Authentication Required)
+- ✏️ Manage destinations and packages (CRUD operations)
+- 📊 View and manage trip requests
+- 📝 Add admin notes to inquiries
+- 🔐 Secure admin-only access
+
+## Tech Stack
+
+- **Framework**: Astro 5.x with SSR
+- **UI**: React 19 + Tailwind CSS
+- **Database**: Supabase (PostgreSQL)
+- **Deployment**: Node.js adapter for standalone mode
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Supabase account
+
+### Installation
+
+1. Clone the repository:
 ```sh
-npm create astro@latest -- --template basics
+git clone <repository-url>
+cd stressfree-trip-planner-master
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+2. Install dependencies:
+```sh
+npm install
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+3. Configure environment variables:
+```sh
+cp .env.example .env
+```
 
-## 🧞 Commands
+Edit `.env` and add your credentials:
+```env
+PUBLIC_SUPABASE_URL=your-supabase-url
+PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+ADMIN_EMAIL=your-admin-email@example.com
+```
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-=======
-# stressfree-trip-planner
->>>>>>> f22c4df8b853b9d02cb29e6df9d289c2ffa3421e
+4. Run database migrations:
+```sh
+# Connect

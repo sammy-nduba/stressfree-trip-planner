@@ -1,0 +1,200 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../lib/supabase';
+
+export async function getStaticPaths() {
+  const { data: packages } = await supabase
+    .from('packages')
+    .select('id');
+
+  return packages?.map((pkg) => ({
+    params: { id: pkg.id },
+  })) || [];
+}
+
+const { id } = Astro.params;
+const { data: pkg, error } = await supabase
+  .from('packages')
+  .select('*')
+  .eq('id', id)
+  .single();
+
+if (error || !pkg) {
+  return Astro.redirect('/404');
+}
+---
+
+<Layout title={`${pkg.title} - Stress-Free Holiday Makers`}>
+  <section class="pt-24 pb-20 bg-gradient-to-b from-sky to-white min-h-screen">
+    <div class="max-w-6xl mx-auto px-6">
+      <!-- Hero Section -->
+      <div class="grid lg:grid-cols-2 gap-12 mb-12">
+        <!-- Image Gallery -->
+        <div class="space-y-4">
+          {pkg.images && pkg.images.length > 0 ? (
+            <div class="aspect-video rounded-3xl overflow-hidden">
+              <img
+                src={pkg.images[0]}
+                alt={pkg.title}
+                class="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div class="aspect-video bg-gradient-to-br from-teal to-coral rounded-3xl flex items-center justify-center">
+              <span class="text-white text-6xl">📸</span>
+            </div>
+          )}
+
+          {pkg.images && pkg.images.length > 1 && (
+            <div class="grid grid-cols-4 gap-4">
+              {pkg.images.slice(1, 5).map((image, index) => (
+                <div class="aspect-square rounded-xl overflow-hidden">
+                  <img
+                    src={image}
+                    alt={`${pkg.title} ${index + 2}`}
+                    class="w-full h-full object-cover hover:scale-110 transition-transform cursor-pointer"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <!-- Package Info -->
+        <div class="space-y-6">
+          <div>
+            <h1 class="text-4xl md:text-5xl font-serif text-ocean mb-2">
+              {pkg.title}
+            </h1>
+            <div class="flex items-center gap-4 text-lg">
+              <span class="flex items-center gap-2">
+                <span class="text-2xl">📍</span>
+                {pkg.destination}
+              </span>
+              <span class="flex items-center gap-2">
+                <span class="text-2xl">📅</span>
+                {pkg.duration_days} days
+              </span>
+            </div>
+          </div>
+
+          <p class="text-ocean/80 text-lg leading-relaxed">
+            {pkg.description}
+          </p>
+
+          <!-- Key Details -->
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="bg-white rounded-2xl p-4 shadow-sm">
+              <div class="text-2xl mb-1">💰</div>
+              <div class="text-2xl font-bold text-ocean">${pkg.price}</div>
+              <div class="text-ocean/60 text-sm">per person</div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm">
+              <div class="text-2xl mb-1">👥</div>
+              <div class="text-2xl font-bold text-ocean">{pkg.max_participants || 'N/A'}</div>
+              <div class="text-ocean/60 text-sm">max participants</div>
+            </div>
+          </div>
+
+          <!-- Book Now Button -->
+          <a
+            href={`/packages/${pkg.id}/book`}
+            class="w-full block text-center py-4 bg-teal text-white rounded-2xl hover:bg-teal/90 transition-colors font-medium text-lg"
+          >
+            Book This Package →
+          </a>
+        </div>
+      </div>
+
+      <!-- Itinerary Section -->
+      {pkg.itinerary && (
+        <div class="bg-white rounded-3xl shadow-lg p-8 mb-8">
+          <h2 class="text-3xl font-serif text-ocean mb-6">Your Itinerary</h2>
+          <div class="space-y-6">
+            {Object.entries(pkg.itinerary).map(([day, activities]) => (
+              <div class="border-l-4 border-teal pl-6">
+                <h3 class="text-xl font-serif text-ocean mb-2">Day {day}</h3>
+                <div class="text-ocean/80 space-y-2">
+                  {Array.isArray(activities) ? (
+                    activities.map((activity, index) => (
+                      <p key={index}>• {activity}</p>
+                    ))
+                  ) : (
+                    <p>{activities}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- What's Included -->
+      <div class="grid md:grid-cols-2 gap-8 mb-8">
+        <div class="bg-white rounded-3xl shadow-lg p-8">
+          <h3 class="text-2xl font-serif text-ocean mb-6">What's Included</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="text-green-500 text-xl">✓</span>
+              <span class="text-ocean/80">Accommodation</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-green-500 text-xl">✓</span>
+              <span class="text-ocean/80">Guided tours</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-green-500 text-xl">✓</span>
+              <span class="text-ocean/80">Transportation</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-green-500 text-xl">✓</span>
+              <span class="text-ocean/80">Entrance fees</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-lg p-8">
+          <h3 class="text-2xl font-serif text-ocean mb-6">Need to Know</h3>
+          <div class="space-y-4">
+            <div>
+              <h4 class="font-semibold text-ocean mb-1">Best Time to Visit</h4>
+              <p class="text-ocean/70">June to September (dry season)</p>
+            </div>
+            <div>
+              <h4 class="font-semibold text-ocean mb-1">Difficulty Level</h4>
+              <p class="text-ocean/70">Easy to Moderate</p>
+            </div>
+            <div>
+              <h4 class="font-semibold text-ocean mb-1">Languages</h4>
+              <p class="text-ocean/70">English, Swahili</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Section -->
+      <div class="text-center bg-white rounded-3xl shadow-lg p-12">
+        <h2 class="text-3xl font-serif text-ocean mb-4">
+          Ready to Book Your Adventure?
+        </h2>
+        <p class="text-ocean/70 mb-8 max-w-2xl mx-auto">
+          Secure your spot on this amazing journey. Our stress-free booking process ensures everything is taken care of.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href={`/packages/${pkg.id}/book`}
+            class="px-8 py-4 bg-teal text-white rounded-xl hover:bg-teal/90 transition-colors font-medium"
+          >
+            Book Now - ${pkg.price}
+          </a>
+          <a
+            href="/contact"
+            class="px-8 py-4 bg-sand text-ocean rounded-xl hover:bg-sand/80 transition-colors font-medium"
+          >
+            Ask Questions
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

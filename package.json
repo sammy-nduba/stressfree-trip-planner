@@ -1,5 +1,5 @@
 {
-  "name": "@example/basics",
+  "name": "stressfree-trip-planner",
   "type": "module",
   "version": "0.0.1",
   "private": true,
@@ -10,7 +10,9 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/node": "^9.5.1",
     "@astrojs/react": "^4.4.2",
+    "@supabase/supabase-js": "^2.83.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
