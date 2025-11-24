@@ -1,26 +1,28 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { supabase } from '../../lib/supabase';
+import Layout from "../../layouts/Layout.astro";
+import { supabase } from "../../lib/supabase";
+
+export const prerender = true;
 
 export async function getStaticPaths() {
-  const { data: packages } = await supabase
-    .from('packages')
-    .select('id');
+  const { data: packages } = await supabase.from("packages").select("id");
 
-  return packages?.map((pkg) => ({
-    params: { id: pkg.id },
-  })) || [];
+  return (
+    packages?.map((pkg) => ({
+      params: { id: pkg.id },
+    })) || []
+  );
 }
 
 const { id } = Astro.params;
 const { data: pkg, error } = await supabase
-  .from('packages')
-  .select('*')
-  .eq('id', id)
+  .from("packages")
+  .select("*")
+  .eq("id", id)
   .single();
 
 if (error || !pkg) {
-  return Astro.redirect('/404');
+  return Astro.redirect("/404");
 }
 ---
 
@@ -31,33 +33,37 @@ if (error || !pkg) {
       <div class="grid lg:grid-cols-2 gap-12 mb-12">
         <!-- Image Gallery -->
         <div class="space-y-4">
-          {pkg.images && pkg.images.length > 0 ? (
-            <div class="aspect-video rounded-3xl overflow-hidden">
-              <img
-                src={pkg.images[0]}
-                alt={pkg.title}
-                class="w-full h-full object-cover"
-              />
-            </div>
-          ) : (
-            <div class="aspect-video bg-gradient-to-br from-teal to-coral rounded-3xl flex items-center justify-center">
-              <span class="text-white text-6xl">📸</span>
-            </div>
-          )}
+          {
+            pkg.images && pkg.images.length > 0 ? (
+              <div class="aspect-video rounded-3xl overflow-hidden">
+                <img
+                  src={pkg.images[0]}
+                  alt={pkg.title}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div class="aspect-video bg-gradient-to-br from-teal to-coral rounded-3xl flex items-center justify-center">
+                <span class="text-white text-6xl">📸</span>
+              </div>
+            )
+          }
 
-          {pkg.images && pkg.images.length > 1 && (
-            <div class="grid grid-cols-4 gap-4">
-              {pkg.images.slice(1, 5).map((image, index) => (
-                <div class="aspect-square rounded-xl overflow-hidden">
-                  <img
-                    src={image}
-                    alt={`${pkg.title} ${index + 2}`}
-                    class="w-full h-full object-cover hover:scale-110 transition-transform cursor-pointer"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          {
+            pkg.images && pkg.images.length > 1 && (
+              <div class="grid grid-cols-4 gap-4">
+                {pkg.images.slice(1, 5).map((image, index) => (
+                  <div class="aspect-square rounded-xl overflow-hidden">
+                    <img
+                      src={image}
+                      alt={`${pkg.title} ${index + 2}`}
+                      class="w-full h-full object-cover hover:scale-110 transition-transform cursor-pointer"
+                    />
+                  </div>
+                ))}
+              </div>
+            )
+          }
         </div>
 
         <!-- Package Info -->
@@ -91,7 +97,9 @@ if (error || !pkg) {
             </div>
             <div class="bg-white rounded-2xl p-4 shadow-sm">
               <div class="text-2xl mb-1">👥</div>
-              <div class="text-2xl font-bold text-ocean">{pkg.max_participants || 'N/A'}</div>
+              <div class="text-2xl font-bold text-ocean">
+                {pkg.max_participants || "N/A"}
+              </div>
               <div class="text-ocean/60 text-sm">max participants</div>
             </div>
           </div>
@@ -107,27 +115,29 @@ if (error || !pkg) {
       </div>
 
       <!-- Itinerary Section -->
-      {pkg.itinerary && (
-        <div class="bg-white rounded-3xl shadow-lg p-8 mb-8">
-          <h2 class="text-3xl font-serif text-ocean mb-6">Your Itinerary</h2>
-          <div class="space-y-6">
-            {Object.entries(pkg.itinerary).map(([day, activities]) => (
-              <div class="border-l-4 border-teal pl-6">
-                <h3 class="text-xl font-serif text-ocean mb-2">Day {day}</h3>
-                <div class="text-ocean/80 space-y-2">
-                  {Array.isArray(activities) ? (
-                    activities.map((activity, index) => (
-                      <p key={index}>• {activity}</p>
-                    ))
-                  ) : (
-                    <p>{activities}</p>
-                  )}
+      {
+        pkg.itinerary && (
+          <div class="bg-white rounded-3xl shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-serif text-ocean mb-6">Your Itinerary</h2>
+            <div class="space-y-6">
+              {Object.entries(pkg.itinerary).map(([day, activities]) => (
+                <div class="border-l-4 border-teal pl-6">
+                  <h3 class="text-xl font-serif text-ocean mb-2">Day {day}</h3>
+                  <div class="text-ocean/80 space-y-2">
+                    {Array.isArray(activities) ? (
+                      activities.map((activity, index) => (
+                        <p key={index}>• {activity}</p>
+                      ))
+                    ) : (
+                      <p>{activities}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <!-- What's Included -->
       <div class="grid md:grid-cols-2 gap-8 mb-8">
@@ -178,7 +188,8 @@ if (error || !pkg) {
           Ready to Book Your Adventure?
         </h2>
         <p class="text-ocean/70 mb-8 max-w-2xl mx-auto">
-          Secure your spot on this amazing journey. Our stress-free booking process ensures everything is taken care of.
+          Secure your spot on this amazing journey. Our stress-free booking
+          process ensures everything is taken care of.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <a
