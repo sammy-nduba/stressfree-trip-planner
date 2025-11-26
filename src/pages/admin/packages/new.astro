@@ -1,6 +1,9 @@
 ---
 import AdminLayout from "../../../layouts/AdminLayout.astro";
-import { supabase } from "../../../lib/supabase";
+import { createServerSupabaseClient } from "../../../lib/supabase";
+
+// Create server-side Supabase client with authenticated session
+const supabase = createServerSupabaseClient(Astro.cookies);
 
 // Handle form submission
 if (Astro.request.method === "POST") {
@@ -34,33 +37,26 @@ if (Astro.request.method === "POST") {
             throw new Error("Image is required");
         }
 
-        const highlights = formData
-            .get("highlights")
-            ?.toString()
-            .split("\n")
-            .filter((h) => h.trim());
-        const included = formData
+        const inclusions = formData
             .get("included")
             ?.toString()
             .split("\n")
             .filter((i) => i.trim());
-        const not_included = formData
+        const exclusions = formData
             .get("not_included")
             ?.toString()
             .split("\n")
             .filter((i) => i.trim());
 
         const { error } = await supabase.from("packages").insert({
-            title,
+            name: title,
             description,
             price: parseFloat(price?.toString() || "0"),
-            duration,
-            destination_id,
-            image_url,
-            highlights,
-            included,
-            not_included,
-            is_featured: formData.get("is_featured") === "on",
+            duration: parseInt(duration?.toString() || "0"),
+            destination_id: parseInt(destination_id?.toString() || "0"),
+            image: image_url,
+            inclusions,
+            exclusions,
         });
 
         if (error) throw error;
@@ -187,7 +183,7 @@ const { data: countries } = await supabase
             </div>
 
             <!-- Details -->
-            <div class="grid md:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                     <label
                         for="price"
@@ -209,29 +205,17 @@ const { data: countries } = await supabase
                     <label
                         for="duration"
                         class="block text-sm font-medium text-gray-700"
-                        >Duration</label
+                        >Duration (days)</label
                     >
                     <input
-                        type="text"
+                        type="number"
                         id="duration"
                         name="duration"
+                        min="1"
                         required
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
-                        placeholder="e.g., 5 Days / 4 Nights"
+                        placeholder="e.g., 5"
                     />
-                </div>
-
-                <div class="flex items-center pt-8">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            name="is_featured"
-                            class="w-5 h-5 text-teal rounded focus:ring-teal"
-                        />
-                        <span class="text-sm font-medium text-gray-700"
-                            >Feature on Homepage</span
-                        >
-                    </label>
                 </div>
             </div>
 
@@ -255,24 +239,7 @@ const { data: countries } = await supabase
             </div>
 
             <!-- Lists -->
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="space-y-2">
-                    <label
-                        for="highlights"
-                        class="block text-sm font-medium text-gray-700"
-                        >Highlights (One per line)</label
-                    >
-                    <textarea
-                        id="highlights"
-                        name="highlights"
-                        rows="6"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
-                        placeholder="Sunset Cruise
-City Tour
-Beach Dinner"
-                    ></textarea>
-                </div>
-
+            <div class="grid md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                     <label
                         for="included"

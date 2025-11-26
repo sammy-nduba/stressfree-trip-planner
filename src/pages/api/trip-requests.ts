@@ -1,5 +1,31 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+
+// Create a server-side client for API routes (allows anonymous inserts)
+// Add custom fetch with timeout to handle slow connections
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: false,
+    },
+    global: {
+        fetch: (url, options) => {
+            return fetch(url, {
+                ...options,
+                // @ts-ignore
+                timeout: 20000, // 20 second timeout
+                headers: {
+                    ...options?.headers,
+                    'Connection': 'keep-alive',
+                    'apikey': supabaseAnonKey,
+                    'Authorization': `Bearer ${supabaseAnonKey}`
+                }
+            });
+        }
+    }
+});
 
 export const POST: APIRoute = async ({ request }) => {
     try {
