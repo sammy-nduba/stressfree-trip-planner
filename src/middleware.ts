@@ -1,15 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
 import { createServerSupabaseClient } from "./lib/supabase";
-import dns from "node:dns";
-
-// Force IPv4 to avoid timeouts on networks with broken IPv6
-try {
-  if (dns.setDefaultResultOrder) {
-    dns.setDefaultResultOrder('ipv4first');
-  }
-} catch (e) {
-  console.warn("Could not set DNS result order:", e);
-}
 
 export const onRequest = defineMiddleware(async (context, next) => {
   // Protect all routes under /admin

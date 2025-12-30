@@ -51,10 +51,12 @@ if (error) {
                             >
                                 {/* Package Image */}
                                 <div class="aspect-video overflow-hidden">
-                                    {pkg.image_url ? (
+                                    {pkg.images?.[0] || pkg.image_url ? (
                                         <img
-                                            src={pkg.image_url}
-                                            alt={pkg.title || pkg.name}
+                                            src={
+                                                pkg.images?.[0] || pkg.image_url
+                                            }
+                                            alt={pkg.name}
                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                         />
                                     ) : (
@@ -73,18 +75,14 @@ if (error) {
                                     </h3>
 
                                     {/* Destination */}
-                                    {pkg.destinations && (
-                                        <div class="flex items-center gap-2 text-ocean/60 mb-3">
-                                            <span class="text-lg">📍</span>
-                                            <span>
-                                                {pkg.destinations.name},{" "}
-                                                {
-                                                    pkg.destinations.countries
-                                                        ?.name
-                                                }
-                                            </span>
-                                        </div>
-                                    )}
+                                    <div class="flex items-center gap-2 text-ocean/60 mb-3">
+                                        <span class="text-lg">📍</span>
+                                        <span>
+                                            {pkg.custom_destination ||
+                                             (pkg.destinations ? `${pkg.destinations.name}, ${pkg.destinations.countries?.name}` : 'Custom Location')
+                                            }
+                                        </span>
+                                    </div>
 
                                     {/* Description */}
                                     <p class="text-ocean/70 mb-4 line-clamp-3">

@@ -49,7 +49,7 @@ try {
   console.error("Payment intent creation failed:", error);
   // Redirect back to booking with error
   return Astro.redirect(
-    `/packages/book/${booking.package_id || ""}?error=payment_failed`,
+    `/packages/${booking.package_id}/book?error=payment_failed`,
   );
 }
 ---
@@ -99,7 +99,7 @@ try {
             </button>
 
             <a
-              href={`/packages/book/${booking.package_id}`}
+              href={`/packages/${booking.package_id}/book`}
               class="block w-full text-center py-3 text-ocean/70 hover:text-ocean transition-colors"
             >
               ← Back to Booking Details

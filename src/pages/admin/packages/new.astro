@@ -14,27 +14,36 @@ if (Astro.request.method === "POST") {
         const price = formData.get("price");
         const duration = formData.get("duration");
         const destination_id = formData.get("destination_id");
-        const imageFile = formData.get("image") as File;
+        const custom_destination = formData.get("custom_destination");
+        const imageFiles = formData.getAll("images") as File[];
 
-        let image_url = "";
+        const imageUrls: string[] = [];
 
-        if (imageFile && imageFile.size > 0) {
-            const fileExt = imageFile.name.split(".").pop();
-            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-            const { error: uploadError } = await supabase.storage
-                .from("packages")
-                .upload(fileName, imageFile);
+        // Process multiple images
+        for (const imageFile of imageFiles) {
+            if (imageFile && imageFile.size > 0) {
+                const fileExt = imageFile.name.split(".").pop();
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-            if (uploadError) throw uploadError;
+                const { error: uploadError } = await supabase.storage
+                    .from("packages")
+                    .upload(fileName, imageFile);
 
-            const {
-                data: { publicUrl },
-            } = supabase.storage.from("packages").getPublicUrl(fileName);
+                if (uploadError) {
+                    console.error("Upload error:", uploadError);
+                    throw uploadError;
+                }
 
-            image_url = publicUrl;
-        } else {
-            // Fallback if they somehow bypassed the required check or if we want to allow URL input as backup (not implemented here)
-            throw new Error("Image is required");
+                const {
+                    data: { publicUrl },
+                } = supabase.storage.from("packages").getPublicUrl(fileName);
+
+                imageUrls.push(publicUrl);
+            }
+        }
+
+        if (imageUrls.length === 0) {
+            throw new Error("At least one image is required");
         }
 
         const inclusions = formData
@@ -53,8 +62,10 @@ if (Astro.request.method === "POST") {
             description,
             price: parseFloat(price?.toString() || "0"),
             duration: parseInt(duration?.toString() || "0"),
-            destination_id: parseInt(destination_id?.toString() || "0"),
-            image: image_url,
+            destination_id: destination_id ? parseInt(destination_id.toString()) : null,
+            custom_destination: custom_destination?.toString() || null,
+            images: imageUrls, // Store array of image URLs
+            image_url: imageUrls[0], // First image for backward compatibility
             inclusions,
             exclusions,
         });
@@ -66,12 +77,6 @@ if (Astro.request.method === "POST") {
         console.error("Error creating package:", error);
     }
 }
-
-// Fetch destinations for the dropdown
-const { data: destinations } = await supabase
-    .from("destinations")
-    .select("id, name, country_id")
-    .order("name");
 
 // Fetch countries for the dropdown
 const { data: countries } = await supabase
@@ -119,7 +124,7 @@ const { data: countries } = await supabase
                     <label
                         for="country_id"
                         class="block text-sm font-medium text-gray-700"
-                        >Country</label
+                        >Country (Optional)</label
                     >
                     <select
                         id="country_id"
@@ -139,30 +144,21 @@ const { data: countries } = await supabase
 
                 <div class="space-y-2">
                     <label
-                        for="destination_id"
+                        for="custom_destination"
                         class="block text-sm font-medium text-gray-700"
                         >Destination</label
                     >
-                    <select
-                        id="destination_id"
-                        name="destination_id"
+                    <input
+                        type="text"
+                        id="custom_destination"
+                        name="custom_destination"
                         required
-                        disabled
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    >
-                        <option value="">Select a country first...</option>
-                        {
-                            destinations?.map((dest) => (
-                                <option
-                                    value={dest.id}
-                                    data-country-id={dest.country_id}
-                                    class="hidden destination-option"
-                                >
-                                    {dest.name}
-                                </option>
-                            ))
-                        }
-                    </select>
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
+                        placeholder="e.g., Paris, France or Custom Location"
+                    />
+                    <p class="text-sm text-gray-500">
+                        Type any destination name - you can create custom locations beyond the predefined ones
+                    </p>
                 </div>
             </div>
 
@@ -221,20 +217,22 @@ const { data: countries } = await supabase
 
             <div class="space-y-2">
                 <label
-                    for="image"
+                    for="images"
                     class="block text-sm font-medium text-gray-700"
-                    >Package Image</label
+                    >Package Images</label
                 >
                 <input
                     type="file"
-                    id="image"
-                    name="image"
+                    id="images"
+                    name="images"
                     accept="image/*"
+                    multiple
                     required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
                 />
                 <p class="text-sm text-gray-500">
-                    Upload a high-quality image for the package.
+                    Upload 1-5 high-quality images for the package gallery.
+                    First image will be the main display image.
                 </p>
             </div>
 
@@ -292,40 +290,4 @@ Personal Expenses"></textarea>
     </div>
 </AdminLayout>
 
-<script>
-    const countrySelect = document.getElementById(
-        "country_id",
-    ) as HTMLSelectElement;
-    const destinationSelect = document.getElementById(
-        "destination_id",
-    ) as HTMLSelectElement;
-    const destinationOptions = document.querySelectorAll(".destination-option");
 
-    countrySelect?.addEventListener("change", (e) => {
-        const selectedCountryId = (e.target as HTMLSelectElement).value;
-
-        // Reset destination selection
-        destinationSelect.value = "";
-
-        if (!selectedCountryId) {
-            destinationSelect.disabled = true;
-            destinationSelect.innerHTML =
-                '<option value="">Select a country first...</option>';
-            return;
-        }
-
-        destinationSelect.disabled = false;
-        destinationSelect.innerHTML =
-            '<option value="">Select a destination...</option>';
-
-        // Filter options
-        destinationOptions.forEach((option) => {
-            const opt = option as HTMLOptionElement;
-            if (opt.dataset.countryId === selectedCountryId) {
-                const clone = opt.cloneNode(true) as HTMLOptionElement;
-                clone.classList.remove("hidden");
-                destinationSelect.appendChild(clone);
-            }
-        });
-    });
-</script>

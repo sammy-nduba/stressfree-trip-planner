@@ -40,8 +40,8 @@ if (error) {
           <tr class="border-b border-gray-200 last:border-b-0">
             <td class="p-4 text-gray-800">{pkg.name}</td>
             <td class="p-4 text-gray-800">${pkg.price}</td>
-            <td class="p-4 text-gray-800">{pkg.destinations?.name}</td>
-            <td class="p-4 text-gray-800">{pkg.destinations?.countries?.name}</td>
+            <td class="p-4 text-gray-800">{pkg.custom_destination || pkg.destinations?.name || 'Custom Location'}</td>
+            <td class="p-4 text-gray-800">{pkg.destinations?.countries?.name || 'N/A'}</td>
             <td class="p-4">
               <a href={`/admin/packages/${pkg.id}/edit`} class="text-blue-600 hover:underline">Edit</a>
             </td>

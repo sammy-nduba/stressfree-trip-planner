@@ -72,3 +72,29 @@ export async function getPackagesByCountry(countryName: string) {
 
     return packages;
 }
+
+export async function getFeaturedPackages(limit: number = 6) {
+    const { data: packages, error } = await supabase
+        .from('packages')
+        .select(`
+            *,
+            destinations (
+                name,
+                country_id,
+                countries (
+                    name
+                )
+            )
+        `)
+        .order('is_featured', { ascending: false })
+        .order('booking_count', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+    if (error) {
+        console.error('Error fetching featured packages:', error);
+        return [];
+    }
+
+    return packages || [];
+}

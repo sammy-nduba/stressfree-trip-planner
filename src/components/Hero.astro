@@ -1,7 +1,10 @@
 ---
 // src/components/Hero.astro
 ---
-<section class="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-sky via-teal/20 to-sand">
+
+<section
+  class="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-white via-teal/10 to-white"
+>
   <!-- Video background -->
   <video
     autoplay
@@ -16,26 +19,33 @@
     Your browser does not support the video tag.
   </video>
 
-  <div class="absolute inset-0 bg-gradient-to-b from-sky/80 to-sand/60"></div>
+  <div class="absolute inset-0 bg-gradient-to-b from-white/80 to-teal/5"></div>
 
   <div class="relative text-center px-6 max-w-4xl mx-auto">
     <!-- Logo Icon -->
     <div class="flex justify-center mb-6">
-      <div class="w-20 h-20 bg-gradient-to-br from-teal to-coral rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-        <span class="text-white text-4xl">✈️</span>
-      </div>
+      <img
+        src="/logo.png"
+        alt="Stress-Free Holiday Makers"
+        class="w-24 h-24 object-contain shadow-2xl rounded-full animate-pulse"
+      />
     </div>
 
     <h1 class="text-5xl md:text-7xl font-serif text-ocean leading-tight mb-2">
-      <span class="block bg-gradient-to-r from-ocean via-teal to-coral bg-clip-text text-transparent">
+      <span
+        class="block bg-gradient-to-r from-ocean via-teal to-coral bg-clip-text text-transparent"
+      >
         Stress-Free
       </span>
-      <span class="block text-4xl md:text-5xl text-teal font-light tracking-wide mt-2">
+      <span
+        class="block text-4xl md:text-5xl text-teal font-light tracking-wide mt-2"
+      >
         Holiday Makers
       </span>
     </h1>
     <p class="mt-6 text-xl md:text-2xl text-ocean font-light italic">
-      ✨ Chill or thrill, the choice is yours, Stress-Free Holiday Makers opens doors. ✨
+      ✨ Chill or thrill, the choice is yours, Stress-Free Holiday Makers opens
+      doors. ✨
     </p>
     <a
       href="#start"
@@ -48,20 +58,20 @@
 
 <script>
   // Enhanced smooth scroll with easing
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener("DOMContentLoaded", () => {
     const links = document.querySelectorAll('a[href^="#"]');
 
-    links.forEach(link => {
-      link.addEventListener('click', (e) => {
-        const href = link.getAttribute('href');
-        if (href && href !== '#') {
+    links.forEach((link) => {
+      link.addEventListener("click", (e) => {
+        const href = link.getAttribute("href");
+        if (href && href !== "#") {
           e.preventDefault();
           const target = document.querySelector(href);
 
           if (target) {
             target.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
+              behavior: "smooth",
+              block: "start",
             });
           }
         }

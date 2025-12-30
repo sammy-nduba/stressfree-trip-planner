@@ -1,91 +1,92 @@
+---
+ // src/components/Destinations.astro
+ import { getFeaturedPackages } from "../lib/api";
 
----
-// src/components/Destinations.astro
-const destinations = [
-  {
-    name: "Kenya",
-    img: "https://images.unsplash.com/photo-1489392191049-fc10c97e64b6?w=800&h=600&fit=crop",
-    desc: "Savannah safaris & wildlife",
-    link: "/destinations/Kenya",
-    hasPage: true
-  },
-  {
-    name: "Uganda",
-    img: "https://images.unsplash.com/photo-1551522435-a13afa10f103?w=800&h=600&fit=crop",
-    desc: "Mountain gorillas & lush landscapes",
-    link: "/destinations/Uganda",
-    hasPage: true
-  },
-  {
-    name: "Ethiopia",
-    img: "https://images.unsplash.com/photo-1609198092357-c7a0c9c6d8d3?w=800&h=600&fit=crop",
-    desc: "Ancient history & highlands",
-    link: null,
-    hasPage: false
-  },
-  {
-    name: "Tanzania",
-    img: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&h=600&fit=crop",
-    desc: "Serengeti plains & Kilimanjaro",
-    link: null,
-    hasPage: false
-  },
-  {
-    name: "South Africa",
-    img: "https://images.unsplash.com/photo-1484318571209-661cf29a69c3?w=800&h=600&fit=crop",
-    desc: "Diverse wildlife & coastal beauty",
-    link: null,
-    hasPage: false
-  },
-  {
-    name: "Morocco",
-    img: "https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=800&h=600&fit=crop",
-    desc: "Sahara dunes & vibrant souks",
-    link: null,
-    hasPage: false
-  },
-];
----
-<section class="pt-64 pb-20 px-6">
-  <div class="max-w-6xl mx-auto">
-    <h2 class="text-4xl md:text-5xl font-serif text-center text-ocean mb-16">
-      Destinations That Breathe Calm
-    </h2>
-    <div class="grid md:grid-cols-3 gap-6">
-      {destinations.map((d) => (
-        d.hasPage ? (
-          <a href={d.link} class="group cursor-pointer overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition block">
-            <img
-              src={d.img}
-              alt={d.name}
-              loading="lazy"
-              class="w-full h-64 object-cover group-hover:scale-110 transition duration-500"
-            />
-            <div class="p-6 bg-white">
-              <div class="flex items-center justify-between">
-                <h3 class="text-xl font-serif text-ocean">{d.name}</h3>
-                <span class="text-teal text-2xl group-hover:translate-x-1 transition-transform">→</span>
-              </div>
-              <p class="text-sm text-teal mt-1">{d.desc}</p>
-              <p class="text-xs text-coral mt-2 font-medium">Click to explore destinations →</p>
-            </div>
-          </a>
-        ) : (
-          <div class="group cursor-pointer overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition opacity-60">
-            <img
-              src={d.img}
-              alt={d.name}
-              loading="lazy"
-              class="w-full h-64 object-cover group-hover:scale-110 transition duration-500"
-            />
-            <div class="p-6 bg-white">
-              <h3 class="text-xl font-serif text-ocean">{d.name}</h3>
-              <p class="text-sm text-teal mt-1">{d.desc}</p>
-              <p class="text-xs text-ocean/50 mt-2 italic">Coming soon...</p>
-            </div>
-          </div>
-        )
-      ))}
-    </div>
-  </div>
-</section>
+ // Fetch top 6 featured packages from database
+ const featuredPackages = await getFeaturedPackages(6);
+
+ // Calculate how many "Coming soon" placeholders we need
+ const placeholderCount = Math.max(0, 6 - featuredPackages.length);
+ const placeholders = Array(placeholderCount).fill(null);
+ ---
+
+ <section class="pt-64 pb-20 px-6">
+   <div class="max-w-6xl mx-auto">
+     <h2 class="text-4xl md:text-5xl font-serif text-center text-ocean mb-16">
+       Destinations That Breathe Calm
+     </h2>
+     <div class="grid md:grid-cols-3 gap-6">
+       {/* Real packages from database */}
+       {
+         featuredPackages.map((pkg) => (
+           <a
+             href={`/packages/${pkg.id}`}
+             class="group cursor-pointer overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition block"
+           >
+             <img
+               src={
+                 pkg.image_url ||
+                 `https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&h=600&fit=crop`
+               }
+               alt={pkg.name}
+               loading="lazy"
+               class="w-full h-64 object-cover group-hover:scale-110 transition duration-500"
+             />
+             <div class="p-6 bg-white">
+               <div class="flex items-center justify-between">
+                 <h3 class="text-xl font-serif text-ocean">{pkg.name}</h3>
+                 <span class="text-teal text-2xl group-hover:translate-x-1 transition-transform">
+                   →
+                 </span>
+               </div>
+               {/* Show destination info if available */}
+               <p class="text-sm text-teal mt-1">
+                 {pkg.custom_destination ||
+                  (pkg.destinations ? `${pkg.destinations.name}, ${pkg.destinations.countries?.name}` : 'Custom Location')
+                 }
+               </p>
+               {/* Show price and duration */}
+               <div class="flex items-center justify-between mt-3">
+                 {pkg.duration && (
+                   <span class="text-xs text-ocean/60">📅 {pkg.duration}</span>
+                 )}
+                 {pkg.price && (
+                   <span class="text-sm font-bold text-coral">${pkg.price}</span>
+                 )}
+               </div>
+               {pkg.is_featured && (
+                 <div class="mt-2">
+                   <span class="inline-block px-2 py-1 bg-coral/10 text-coral text-xs rounded-full font-medium">
+                     ⭐ Featured
+                   </span>
+                 </div>
+               )}
+               <p class="text-xs text-coral mt-2 font-medium">
+                 Click to explore package →
+               </p>
+             </div>
+           </a>
+         ))
+       }
+
+       {/* Coming soon placeholders if less than 6 packages */}
+       {
+         placeholders.map((_, index) => (
+           <div class="group cursor-pointer overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition opacity-60">
+             <img
+               src={`https://images.unsplash.com/photo-148864695301${index}-85cb44e25828?w=800&h=600&fit=crop`}
+               alt="Coming Soon"
+               loading="lazy"
+               class="w-full h-64 object-cover group-hover:scale-110 transition duration-500"
+             />
+             <div class="p-6 bg-white">
+               <h3 class="text-xl font-serif text-ocean">More Destinations</h3>
+               <p class="text-sm text-teal mt-1">Exciting new packages</p>
+               <p class="text-xs text-ocean/50 mt-2 italic">Coming soon...</p>
+             </div>
+           </div>
+         ))
+       }
+     </div>
+   </div>
+ </section>

@@ -7,11 +7,15 @@
 -- 1. FIX STORAGE RLS POLICIES
 -- ============================================
 
--- Drop existing storage policies
+-- Drop existing storage policies (both old and new names)
 DROP POLICY IF EXISTS "Public Access" ON storage.objects;
 DROP POLICY IF EXISTS "Authenticated users can upload" ON storage.objects;
 DROP POLICY IF EXISTS "Authenticated users can update" ON storage.objects;
 DROP POLICY IF EXISTS "Authenticated users can delete" ON storage.objects;
+DROP POLICY IF EXISTS "Public can view packages" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can upload packages" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can update packages" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can delete packages" ON storage.objects;
 
 -- Create new storage policies with admin checks
 CREATE POLICY "Public can view packages"
@@ -46,7 +50,7 @@ USING (
 -- 2. FIX TRIP REQUESTS RLS POLICIES
 -- ============================================
 
--- Drop all existing trip_requests policies
+-- Drop all existing trip_requests policies (including potential duplicates)
 DROP POLICY IF EXISTS "Anyone can submit trip requests" ON trip_requests;
 DROP POLICY IF EXISTS "Public can submit trip requests" ON trip_requests;
 DROP POLICY IF EXISTS "Admins can view trip requests" ON trip_requests;

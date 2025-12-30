@@ -96,7 +96,7 @@ const kenyaPackages = await getPackagesByCountry('Kenya');
                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
                   <div class="h-48 overflow-hidden relative group">
                     <img 
-                      src={pkg.image_url} 
+                      src={pkg.images?.[0] || pkg.image_url || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&h=600&fit=crop'} 
                       alt={pkg.title} 
                       class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                     />
@@ -121,7 +121,7 @@ const kenyaPackages = await getPackagesByCountry('Kenya');
                           <span class="text-2xl font-bold text-teal">${pkg.price}</span>
                         </div>
                         <a 
-                          href={`/packages/book/${pkg.id}`} 
+                          href={`/packages/${pkg.id}/book`} 
                           class="px-6 py-2 bg-ocean text-white rounded-lg text-sm hover:bg-ocean/90 transition-colors"
                         >
                           View Details
