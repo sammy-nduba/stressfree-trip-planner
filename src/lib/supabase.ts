@@ -43,7 +43,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export function createServerSupabaseClient(cookies: AstroCookies) {
     return createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
+            flowType: 'pkce',
             autoRefreshToken: false,
+            persistSession: false,
             detectSessionInUrl: false,
             storage: {
                 getItem: (key) => {
