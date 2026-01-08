@@ -5,7 +5,36 @@ const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables. Please check your .env file.');
+    const errorMessage = `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❌ Missing Supabase Environment Variables
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Required environment variables are missing:
+${!supabaseUrl ? '  ❌ PUBLIC_SUPABASE_URL' : '  ✅ PUBLIC_SUPABASE_URL'}
+${!supabaseAnonKey ? '  ❌ PUBLIC_SUPABASE_ANON_KEY' : '  ✅ PUBLIC_SUPABASE_ANON_KEY'}
+
+📋 How to fix:
+
+Local Development:
+  1. Copy .env.example to .env
+  2. Add your Supabase credentials to .env
+  3. Restart the dev server
+
+Vercel Deployment:
+  1. Go to your Vercel project dashboard
+  2. Navigate to Settings → Environment Variables
+  3. Add the following variables:
+     • PUBLIC_SUPABASE_URL (your Supabase project URL)
+     • PUBLIC_SUPABASE_ANON_KEY (your Supabase anon key)
+  4. Redeploy your project
+
+📖 See VERCEL_ENV_SETUP.md for detailed instructions
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    `.trim();
+
+    throw new Error(errorMessage);
 }
 
 // Browser-side cookie storage helper
