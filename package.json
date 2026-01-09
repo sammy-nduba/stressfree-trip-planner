@@ -10,8 +10,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/node": "^9.5.1",
     "@astrojs/react": "^4.4.2",
+    "@astrojs/vercel": "^8.0.4",
     "@stripe/stripe-js": "^8.5.3",
     "@supabase/supabase-js": "^2.83.0",
     "@tailwindcss/typography": "^0.5.19",
@@ -19,7 +19,6 @@
     "@types/react-dom": "^19.2.2",
     "astro": "^5.2.5",
     "autoprefixer": "^10.4.21",
-    "express": "^5.1.0",
     "postcss": "^8.5.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

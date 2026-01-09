@@ -1,0 +1,37 @@
+/* empty css                                 */
+import { e as createComponent, k as renderComponent, r as renderTemplate, m as maybeRenderHead } from '../chunks/astro/server_C1SB2yiH.mjs';
+import 'piccolore';
+import { $ as $$Layout } from '../chunks/Layout_DoNu6l0o.mjs';
+export { renderers } from '../renderers.mjs';
+
+const $$Privacy = createComponent(($$result, $$props, $$slots) => {
+  const title = "Privacy Policy \u2013 Stress-Free Holiday Makers";
+  const description = "Our commitment to your privacy and data protection";
+  return renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": title, "description": description }, { "default": ($$result2) => renderTemplate` ${maybeRenderHead()}<div class="min-h-screen bg-white pt-20 pb-20"> <div class="max-w-4xl mx-auto px-6"> <div class="text-center mb-12"> <h1 class="text-5xl md:text-6xl font-light text-[#006064] font-['Playfair_Display'] mb-4">
+Privacy Policy
+</h1> <p class="text-[#26A69A] font-light">
+Last updated: ${(/* @__PURE__ */ new Date()).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })} </p> </div> <div class="prose prose-lg max-w-none bg-gradient-to-b from-[#FFF8E1] to-white rounded-3xl p-10 md:p-16"> <section class="mb-10"> <h2 class="text-3xl font-['Playfair_Display'] text-[#006064] mb-4">Introduction</h2> <p class="text-[#006064]/80">
+At Stress-Free Holiday Makers ("we," "us," "our"), we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website.
+</p> </section> <section class="mb-10"> <h2 class="text-3xl font-['Playfair_Display'] text-[#006064] mb-4">Information We Collect</h2> <p class="text-[#006064]/80 mb-4">We collect information you provide directly:</p> <ul class="space-y-2 text-[#006064]/80"> <li class="flex items-start gap-2"> <span class="text-[#FF8A65] mt-1">•</span> <span><strong>Contact Information:</strong> Email address, name, and preferences</span> </li> <li class="flex items-start gap-2"> <span class="text-[#FF8A65] mt-1">•</span> <span><strong>Usage Data:</strong> Pages visited, time spent, and interaction patterns (via privacy-first analytics only)</span> </li> <li class="flex items-start gap-2"> <span class="text-[#FF8A65] mt-1">•</span> <span><strong>Cookies:</strong> Essential cookies only, no tracking or advertising cookies</span> </li> </ul> </section> <section class="mb-10"> <h2 class="text-3xl font-['Playfair_Display'] text-[#006064] mb-4">How We Use Your Information</h2> <p class="text-[#006064]/80 mb-4">We use your information only to:</p> <ul class="space-y-2 text-[#006064]/80"> <li class="flex items-start gap-2"> <span class="text-[#26A69A] mt-1">✓</span> <span>Provide and improve our service</span> </li> <li class="flex items-start gap-2"> <span class="text-[#26A69A] mt-1">✓</span> <span>Send occasional trip inspiration (with your consent)</span> </li> <li class="flex items-start gap-2"> <span class="text-[#26A69A] mt-1">✓</span> <span>Respond to your inquiries</span> </li> </ul> </section> <section class="mb-10"> <h2 class="text-3xl font-['Playfair_Display'] text-[#006064] mb-4">Your Rights (GDPR)</h2> <p class="text-[#006064]/80">
+If you are located in the EU, you have the right to access, correct, or delete your personal data at any time. Contact us at <a href="mailto:privacy@stressfreeholidaymakers.com" class="text-[#26A69A] hover:text-[#1F8B7F]">privacy@stressfreeholidaymakers.com</a> to exercise these rights.
+</p> </section> <section class="mb-10"> <h2 class="text-3xl font-['Playfair_Display'] text-[#006064] mb-4">Data Security</h2> <p class="text-[#006064]/80">
+Your data is protected with industry-standard security measures. We never share your information with third parties except as required by law.
+</p> </section> <section class="mb-10"> <h2 class="text-3xl font-['Playfair_Display'] text-[#006064] mb-4">Contact Us</h2> <p class="text-[#006064]/80">
+Questions about this policy? Email us at <a href="mailto:privacy@stressfreeholidaymakers.com" class="text-[#26A69A] hover:text-[#1F8B7F]">privacy@stressfreeholidaymakers.com</a> </p> </section> <div class="border-t-2 border-[#26A69A]/30 pt-10 mt-10"> <p class="text-sm text-[#006064]/60 text-center">
+We believe privacy is a fundamental right. We'll never compromise on it.
+</p> </div> </div> </div> </div> ` })}`;
+}, "/home/nduba/Desktop/projects/stressfree-trip-planner-master/src/pages/Privacy.astro", void 0);
+
+const $$file = "/home/nduba/Desktop/projects/stressfree-trip-planner-master/src/pages/Privacy.astro";
+const $$url = "/Privacy";
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+	__proto__: null,
+	default: $$Privacy,
+	file: $$file,
+	url: $$url
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };
