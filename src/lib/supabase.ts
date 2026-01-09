@@ -59,10 +59,9 @@ const browserCookieStorage = {
     },
 };
 
-// Client-side Supabase client (for browser usage) - uses cookies
+// Client-side Supabase client (for browser usage)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-        storage: browserCookieStorage,
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
