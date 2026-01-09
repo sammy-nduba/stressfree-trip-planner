@@ -50,7 +50,8 @@ const browserCookieStorage = {
     setItem: (key: string, value: string) => {
         if (typeof document === 'undefined') return;
         const maxAge = 60 * 60 * 24 * 365; // 1 year
-        document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+        const secure = location.protocol === 'https:' ? '; Secure' : '';
+        document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
     },
     removeItem: (key: string) => {
         if (typeof document === 'undefined') return;
