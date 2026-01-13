@@ -2,9 +2,6 @@
 	"version": 3,
 	"routes": [
 		{
-			"handle": "filesystem"
-		},
-		{
 			"src": "^/_astro/(.*)$",
 			"headers": {
 				"cache-control": "public, max-age=31536000, immutable"
@@ -12,91 +9,94 @@
 			"continue": true
 		},
 		{
-			"src": "^/_server-islands/([^/]+?)/?$",
+			"handle": "filesystem"
+		},
+		{
+			"src": "^\\/_server-islands\\/([^/]+?)\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/_image/?$",
+			"src": "^\\/_image\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/About/?$",
+			"src": "^\\/About\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/admin/packages/new/?$",
+			"src": "^\\/admin\\/packages\\/new\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/admin/packages/?$",
+			"src": "^\\/admin\\/packages\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/admin/trip-requests/([^/]+?)/?$",
+			"src": "^\\/admin\\/trip-requests\\/([^/]+?)\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/admin/trip-requests/?$",
+			"src": "^\\/admin\\/trip-requests\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/admin/?$",
+			"src": "^\\/admin\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/api/trip-requests/update/?$",
+			"src": "^\\/api\\/trip-requests\\/update\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/api/trip-requests/?$",
+			"src": "^\\/api\\/trip-requests\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/auth/login/?$",
+			"src": "^\\/auth\\/login\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/dashboard/?$",
+			"src": "^\\/dashboard\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/debug-auth/?$",
+			"src": "^\\/debug-auth\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/destinations/Kenya/?$",
+			"src": "^\\/destinations\\/Kenya\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/destinations/Uganda/?$",
+			"src": "^\\/destinations\\/Uganda\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/Destinations/?$",
+			"src": "^\\/Destinations\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/packages/book/([^/]+?)/payment/?$",
+			"src": "^\\/packages\\/book\\/([^/]+?)\\/payment\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/packages/([^/]+?)/book/?$",
+			"src": "^\\/packages\\/([^/]+?)\\/book\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/packages/?$",
+			"src": "^\\/packages\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/Planner/?$",
+			"src": "^\\/Planner\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/Privacy/?$",
+			"src": "^\\/Privacy\\/?$",
 			"dest": "_render"
 		},
 		{
-			"src": "^/$",
+			"src": "^\\/$",
 			"dest": "_render"
 		}
 	]
