@@ -6,6 +6,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (context.url.pathname.startsWith('/admin')) {
     console.log(`[Middleware] Checking access for: ${context.url.pathname}`);
 
+
     // Create Supabase client with cookie access
     const supabase = createServerSupabaseClient(context.cookies);
 
@@ -20,20 +21,45 @@ export const onRequest = defineMiddleware(async (context, next) => {
     console.log(`[Middleware] Session found for user: ${session.user.id}`);
 
     // Check if the user has the 'admin' role
-    const { data: profile, error } = await supabase
+    let { data: profile, error } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', session.user.id)
       .single();
 
-    if (error) {
+    // If profile is missing, try to create it (self-registration)
+    if (error && error.code === 'PGRST116') {
+      console.log('[Middleware] Profile missing, attempting to create...');
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: session.user.id,
+          email: session.user.email, // Ensure email is included if column exists
+          role: 'user', // Default to user, but checking overwrite below
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (!createError) {
+        profile = newProfile;
+        console.log('[Middleware] Profile created successfully.');
+      } else {
+        console.error('[Middleware] Failed to create profile:', createError);
+      }
+    }
+
+    if (error && error.code !== 'PGRST116') {
       console.error('[Middleware] Error fetching profile:', error);
     }
 
-    console.log(`[Middleware] User role: ${profile?.role}`);
+    const SUPER_ADMIN_ID = '40edb8e5-85ec-498d-b871-74e27f442aa0';
+    const isSuperAdmin = session.user.id === SUPER_ADMIN_ID;
 
-    // Redirect to home if the user is not an admin
-    if (profile?.role !== 'admin') {
+    console.log(`[Middleware] User role: ${profile?.role} (Super Admin Override: ${isSuperAdmin})`);
+
+    // Redirect to home if the user is not an admin AND not the super admin
+    if (profile?.role !== 'admin' && !isSuperAdmin) {
       console.log('[Middleware] User is not admin, redirecting to home');
       return context.redirect('/');
     }

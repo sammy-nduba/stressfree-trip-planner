@@ -65,6 +65,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,
+        storage: browserCookieStorage,
     },
 });
 
@@ -74,22 +75,19 @@ export function createServerSupabaseClient(cookies: AstroCookies) {
         auth: {
             flowType: 'pkce',
             autoRefreshToken: false,
-            persistSession: false,
+            persistSession: true,
             detectSessionInUrl: false,
             storage: {
                 getItem: (key) => {
-                    return cookies.get(key)?.value ?? null;
+                    const value = cookies.get(key)?.value;
+                    return value ? decodeURIComponent(value) : null;
                 },
                 setItem: (key, value) => {
-                    cookies.set(key, value, {
-                        path: '/',
-                        maxAge: 60 * 60 * 24 * 365, // 1 year
-                        sameSite: 'lax',
-                        secure: import.meta.env.PROD,
-                    });
+                    // Server-side is read-only for session to avoid "headers already sent" errors.
+                    // The client-side handles the token refresh and cookie updates.
                 },
                 removeItem: (key) => {
-                    cookies.delete(key, { path: '/' });
+                    // Server-side is read-only
                 },
             },
         },
