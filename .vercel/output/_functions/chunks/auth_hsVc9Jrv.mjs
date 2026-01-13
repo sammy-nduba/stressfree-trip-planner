@@ -1,4 +1,4 @@
-import { c as createServerSupabaseClient } from './supabase_CBNaP4JO.mjs';
+import { c as createServerSupabaseClient } from './supabase_BLkg8VXK.mjs';
 
 const isAdmin = async (cookies) => {
   const supabase = createServerSupabaseClient(cookies);

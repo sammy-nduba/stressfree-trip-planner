@@ -1,7 +1,7 @@
 import { e as createComponent, f as createAstro, m as maybeRenderHead, l as renderScript, r as renderTemplate, o as renderSlot, k as renderComponent, n as renderHead } from './astro/server_C1SB2yiH.mjs';
 import 'piccolore';
 import 'clsx';
-import { c as createServerSupabaseClient } from './supabase_CBNaP4JO.mjs';
+import { c as createServerSupabaseClient } from './supabase_BLkg8VXK.mjs';
 /* empty css                         */
 
 const $$Astro$1 = createAstro();

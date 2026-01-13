@@ -1,4 +1,4 @@
-import { s as supabase } from './supabase_CBNaP4JO.mjs';
+import { s as supabase } from './supabase_BLkg8VXK.mjs';
 
 async function getDestinationsByCountry(countryName) {
   const { data: country } = await supabase.from("countries").select("id").eq("name", countryName).single();

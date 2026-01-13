@@ -2,7 +2,7 @@
 import { e as createComponent, f as createAstro, k as renderComponent, r as renderTemplate, m as maybeRenderHead, h as addAttribute, l as renderScript } from '../../../chunks/astro/server_C1SB2yiH.mjs';
 import 'piccolore';
 import { $ as $$AdminLayout } from '../../../chunks/AdminLayout_C_-UUSIl.mjs';
-import { s as supabase } from '../../../chunks/supabase_CBNaP4JO.mjs';
+import { s as supabase } from '../../../chunks/supabase_BLkg8VXK.mjs';
 export { renderers } from '../../../renderers.mjs';
 
 const $$Astro = createAstro();

@@ -1,8 +1,8 @@
 /* empty css                                    */
 import { e as createComponent, k as renderComponent, r as renderTemplate, m as maybeRenderHead, h as addAttribute } from '../../chunks/astro/server_C1SB2yiH.mjs';
 import 'piccolore';
-import { $ as $$Layout } from '../../chunks/Layout_D0jjlpkZ.mjs';
-import { g as getDestinationsByCountry, a as getPackagesByCountry } from '../../chunks/api_CoPdRXbQ.mjs';
+import { $ as $$Layout } from '../../chunks/Layout_FBggr8Xt.mjs';
+import { g as getDestinationsByCountry, a as getPackagesByCountry } from '../../chunks/api_CtmOJJYz.mjs';
 export { renderers } from '../../renderers.mjs';
 
 const $$Uganda = createComponent(async ($$result, $$props, $$slots) => {

@@ -1,9 +1,9 @@
 /* empty css                                 */
 import { e as createComponent, m as maybeRenderHead, l as renderScript, r as renderTemplate, h as addAttribute, k as renderComponent } from '../chunks/astro/server_C1SB2yiH.mjs';
 import 'piccolore';
-import { $ as $$Layout } from '../chunks/Layout_D0jjlpkZ.mjs';
+import { $ as $$Layout } from '../chunks/Layout_FBggr8Xt.mjs';
 import 'clsx';
-import { b as getFeaturedPackages } from '../chunks/api_CoPdRXbQ.mjs';
+import { b as getFeaturedPackages } from '../chunks/api_CtmOJJYz.mjs';
 export { renderers } from '../renderers.mjs';
 
 const $$Hero = createComponent(($$result, $$props, $$slots) => {

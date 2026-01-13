@@ -37,14 +37,11 @@ function createServerSupabaseClient(cookies) {
       storage: {
         getItem: (key) => {
           const value = cookies.get(key)?.value;
-          console.log(`[Supabase-Server] Reading cookie ${key}: ${value ? "Found" : "Not Found"}`);
           return value ? decodeURIComponent(value) : null;
         },
         setItem: (key, value) => {
-          console.log(`[Supabase-Server] Skipping setKey ${key} (Read-Only)`);
         },
         removeItem: (key) => {
-          console.log(`[Supabase-Server] Skipping removeKey ${key} (Read-Only)`);
         }
       }
     }

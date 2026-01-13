@@ -1,7 +1,7 @@
 /* empty css                                 */
 import { e as createComponent, k as renderComponent, r as renderTemplate, m as maybeRenderHead } from '../chunks/astro/server_C1SB2yiH.mjs';
 import 'piccolore';
-import { $ as $$Layout } from '../chunks/Layout_D0jjlpkZ.mjs';
+import { $ as $$Layout } from '../chunks/Layout_FBggr8Xt.mjs';
 import { jsxs, jsx } from 'react/jsx-runtime';
 import { useState } from 'react';
 export { renderers } from '../renderers.mjs';

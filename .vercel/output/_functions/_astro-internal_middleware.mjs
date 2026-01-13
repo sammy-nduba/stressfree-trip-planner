@@ -1,5 +1,5 @@
 import { d as defineMiddleware, s as sequence } from './chunks/index_Ch_QnrE5.mjs';
-import { c as createServerSupabaseClient } from './chunks/supabase_CBNaP4JO.mjs';
+import { c as createServerSupabaseClient } from './chunks/supabase_BLkg8VXK.mjs';
 import 'es-module-lexer';
 import './chunks/astro-designed-error-pages_DKkyjkGK.mjs';
 import 'piccolore';
@@ -9,8 +9,6 @@ import 'clsx';
 const onRequest$1 = defineMiddleware(async (context, next) => {
   if (context.url.pathname.startsWith("/admin")) {
     console.log(`[Middleware] Checking access for: ${context.url.pathname}`);
-    const cookieHeader = context.request.headers.get("cookie");
-    console.log(`[Middleware] Cookies header present: ${cookieHeader ? "Yes" : "No"}`);
     const supabase = createServerSupabaseClient(context.cookies);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {

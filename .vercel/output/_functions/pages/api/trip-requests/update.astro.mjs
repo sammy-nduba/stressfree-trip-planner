@@ -1,5 +1,5 @@
-import { c as createServerSupabaseClient } from '../../../chunks/supabase_CBNaP4JO.mjs';
-import { i as isAdmin } from '../../../chunks/auth_BvXsYW-w.mjs';
+import { c as createServerSupabaseClient } from '../../../chunks/supabase_BLkg8VXK.mjs';
+import { i as isAdmin } from '../../../chunks/auth_hsVc9Jrv.mjs';
 export { renderers } from '../../../renderers.mjs';
 
 const POST = async ({ request, cookies }) => {
