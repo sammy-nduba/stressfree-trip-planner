@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 
-export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
+export default function AuthModal({ isOpen, onClose, initialMode = 'login', redirectTo = '/' }) {
   const [mode, setMode] = useState(initialMode);
   const [formData, setFormData] = useState({
     email: '',
@@ -29,8 +29,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
           password: formData.password,
         });
         if (error) throw error;
-        // onClose();
-        window.location.href = '/';
+
+        // Redirect to the specified path after successful login
+        window.location.href = redirectTo;
         return;
       } else {
         if (formData.password !== formData.confirmPassword) {

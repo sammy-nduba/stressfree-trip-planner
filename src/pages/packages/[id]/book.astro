@@ -1,61 +1,106 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
-import { supabase } from '../../../lib/supabase';
+import Layout from "../../../layouts/Layout.astro";
+import { createServerSupabaseClient } from "../../../lib/supabase";
+
+// Create server-side Supabase client
+const supabase = createServerSupabaseClient(Astro.cookies);
 
 // Server-side auth check
-const { data: { session } } = await supabase.auth.getSession();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 
 if (!session) {
-  return new Response(null, {
-    status: 302,
-    headers: { Location: '/auth/login' }
-  });
+  const currentPath = Astro.url.pathname;
+  return Astro.redirect(`/auth/login?redirect=${currentPath}`);
 }
 
 const { id } = Astro.params;
 
 // Fetch package details
 const { data: pkg, error } = await supabase
-  .from('packages')
-  .select('*')
-  .eq('id', id)
+  .from("packages")
+  .select("*")
+  .eq("id", id)
   .single();
 
 if (error || !pkg) {
-  return Astro.redirect('/packages');
+  return Astro.redirect("/packages");
 }
 ---
 
-<Layout title={`Book ${pkg.title} - Stress-Free Holiday Makers`}>
+<Layout title={`Book ${pkg.title || pkg.name} - Stress-Free Holiday Makers`}>
   <section class="pt-24 pb-20 bg-gradient-to-b from-sky to-white min-h-screen">
     <div class="max-w-4xl mx-auto px-6">
       <!-- Header -->
-      <div class="text-center mb-8">
+      <div class="text-center mb-0 md:mb-8">
         <h1 class="text-4xl md:text-5xl font-serif text-ocean mb-4">
           Book Your Adventure
         </h1>
         <p class="text-ocean/70 text-lg">
-          Complete your booking for <strong>{pkg.title}</strong> in {pkg.destination}
+          Complete your booking for <strong>{pkg.title || pkg.name}</strong> in {
+            pkg.destination || pkg.custom_destination || "Selected Destination"
+          }
         </p>
       </div>
 
       <!-- Package Summary -->
-      <div class="bg-white rounded-3xl shadow-lg p-6 mb-8">
+      <div class="bg-white rounded-3xl shadow-lg p-6 mb-8 mt-8">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-2xl font-serif text-ocean mb-1">{pkg.title}</h2>
-            <p class="text-ocean/70">{pkg.destination} • {pkg.duration_days} days</p>
+            <h2 class="text-2xl font-serif text-ocean mb-1">
+              {pkg.title || pkg.name}
+            </h2>
+            <p class="text-ocean/70">
+              {pkg.destination || pkg.custom_destination} • {
+                pkg.duration_days || pkg.duration
+              } days
+            </p>
           </div>
           <div class="text-right">
             <div class="text-3xl font-bold text-teal">${pkg.price}</div>
             <div class="text-sm text-ocean/60">per person</div>
           </div>
         </div>
+
+        {
+          pkg.itinerary && (
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <details class="group">
+                <summary class="flex items-center justify-between cursor-pointer text-teal font-medium group-open:mb-4">
+                  <span>View Full Itinerary</span>
+                  <span class="transform group-open:rotate-180 transition-transform">
+                    ↓
+                  </span>
+                </summary>
+                <div class="space-y-4 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                  {Object.entries(pkg.itinerary || {}).map(
+                    ([day, activities]) => (
+                      <div class="pl-4 border-l-2 border-teal/30">
+                        <p class="font-bold text-ocean text-sm">Day {day}</p>
+                        <p class="text-ocean/70 text-sm italic">
+                          {Array.isArray(activities)
+                            ? activities[0]
+                            : activities}
+                        </p>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </details>
+            </div>
+          )
+        }
       </div>
 
       <!-- Booking Form -->
       <div class="bg-white rounded-3xl shadow-lg p-8">
-        <form id="booking-form" class="space-y-6">
+        <form
+          id="booking-form"
+          class="space-y-6"
+          data-package-id={pkg.id}
+          data-package-price={pkg.price}
+        >
           <!-- Travel Dates -->
           <div class="grid md:grid-cols-2 gap-6">
             <div>
@@ -170,15 +215,19 @@ if (error || !pkg) {
             <div class="space-y-3">
               <div class="flex justify-between">
                 <span class="text-ocean/70">Package:</span>
-                <span class="font-medium">{pkg.title}</span>
+                <span class="font-medium">{pkg.title || pkg.name}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-ocean/70">Duration:</span>
-                <span class="font-medium">{pkg.duration_days} days</span>
+                <span class="font-medium"
+                  >{pkg.duration_days || pkg.duration} days</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-ocean/70">Travelers:</span>
-                <span id="summary-travelers" class="font-medium">2 adults, 0 children</span>
+                <span id="summary-travelers" class="font-medium"
+                  >2 adults, 0 children</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-ocean/70">Price per person:</span>
@@ -202,14 +251,22 @@ if (error || !pkg) {
               required
             />
             <label for="terms" class="text-sm text-ocean/70">
-              I agree to the <a href="/terms" class="text-teal hover:underline">Terms and Conditions</a>
-              and <a href="/privacy" class="text-teal hover:underline">Privacy Policy</a>.
-              I understand that this booking is subject to availability and confirmation.
+              I agree to the <a href="/terms" class="text-teal hover:underline"
+                >Terms and Conditions</a
+              >
+              and <a href="/privacy" class="text-teal hover:underline"
+                >Privacy Policy</a
+              >. I understand that this booking is subject to availability and
+              confirmation.
             </label>
           </div>
 
           <!-- Error Messages -->
-          <div id="error-message" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"></div>
+          <div
+            id="error-message"
+            class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"
+          >
+          </div>
 
           <!-- Submit Button -->
           <button
@@ -226,116 +283,138 @@ if (error || !pkg) {
 </Layout>
 
 <script>
-  import { supabase } from '../../../lib/supabase';
+  import { supabase } from "../../../lib/supabase";
 
-  // Get package data from server
-  const packageData = {pkg};
+  // Get package data from dataset
+  const bookingForm = document.getElementById(
+    "booking-form",
+  ) as HTMLFormElement | null;
+  const packageId = bookingForm?.dataset.packageId;
+  const packagePrice = parseFloat(bookingForm?.dataset.packagePrice || "0");
 
   // Form elements
-  const bookingForm = document.getElementById('booking-form');
-  const startDateInput = document.getElementById('start-date');
-  const endDateInput = document.getElementById('end-date');
-  const adultsInput = document.getElementById('adults');
-  const childrenInput = document.getElementById('children');
-  const adultsMinus = document.getElementById('adults-minus');
-  const adultsPlus = document.getElementById('adults-plus');
-  const childrenMinus = document.getElementById('children-minus');
-  const childrenPlus = document.getElementById('children-plus');
-  const summaryTravelers = document.getElementById('summary-travelers');
-  const totalAmount = document.getElementById('total-amount');
-  const submitButton = document.getElementById('submit-booking');
-  const errorMessage = document.getElementById('error-message');
+  const startDateInput = document.getElementById(
+    "start-date",
+  ) as HTMLInputElement | null;
+  const endDateInput = document.getElementById(
+    "end-date",
+  ) as HTMLInputElement | null;
+  const adultsInput = document.getElementById(
+    "adults",
+  ) as HTMLInputElement | null;
+  const childrenInput = document.getElementById(
+    "children",
+  ) as HTMLInputElement | null;
+  const adultsMinus = document.getElementById("adults-minus");
+  const adultsPlus = document.getElementById("adults-plus");
+  const childrenMinus = document.getElementById("children-minus");
+  const childrenPlus = document.getElementById("children-plus");
+  const summaryTravelers = document.getElementById("summary-travelers");
+  const totalAmount = document.getElementById("total-amount");
+  const submitButton = document.getElementById(
+    "submit-booking",
+  ) as HTMLButtonElement | null;
+  const errorMessage = document.getElementById("error-message");
 
   // Set minimum date to today
-  const today = new Date().toISOString().split('T')[0];
-  startDateInput.min = today;
-  endDateInput.min = today;
+  const today = new Date().toISOString().split("T")[0];
+  if (startDateInput) startDateInput.min = today;
+  if (endDateInput) endDateInput.min = today;
 
   // Handle date changes
-  startDateInput.addEventListener('change', (e) => {
-    endDateInput.min = e.target.value;
+  startDateInput?.addEventListener("change", (e) => {
+    if (endDateInput) endDateInput.min = (e.target as HTMLInputElement).value;
     updateSummary();
   });
 
-  endDateInput.addEventListener('change', () => {
+  endDateInput?.addEventListener("change", () => {
     updateSummary();
   });
 
   // Handle traveler count changes
-  adultsMinus.addEventListener('click', () => {
-    const current = parseInt(adultsInput.value);
-    if (current > 1) {
-      adultsInput.value = current - 1;
+  adultsMinus?.addEventListener("click", () => {
+    const current = parseInt(adultsInput?.value || "0");
+    if (current > 1 && adultsInput) {
+      adultsInput.value = (current - 1).toString();
       updateSummary();
     }
   });
 
-  adultsPlus.addEventListener('click', () => {
-    const current = parseInt(adultsInput.value);
-    if (current < 10) {
-      adultsInput.value = current + 1;
+  adultsPlus?.addEventListener("click", () => {
+    const current = parseInt(adultsInput?.value || "0");
+    if (current < 10 && adultsInput) {
+      adultsInput.value = (current + 1).toString();
       updateSummary();
     }
   });
 
-  childrenMinus.addEventListener('click', () => {
-    const current = parseInt(childrenInput.value);
-    if (current > 0) {
-      childrenInput.value = current - 1;
+  childrenMinus?.addEventListener("click", () => {
+    const current = parseInt(childrenInput?.value || "0");
+    if (current > 0 && childrenInput) {
+      childrenInput.value = (current - 1).toString();
       updateSummary();
     }
   });
 
-  childrenPlus.addEventListener('click', () => {
-    const current = parseInt(childrenInput.value);
-    if (current < 10) {
-      childrenInput.value = current + 1;
+  childrenPlus?.addEventListener("click", () => {
+    const current = parseInt(childrenInput?.value || "0");
+    if (current < 10 && childrenInput) {
+      childrenInput.value = (current + 1).toString();
       updateSummary();
     }
   });
 
   // Update booking summary
   function updateSummary() {
-    const adults = parseInt(adultsInput.value);
-    const children = parseInt(childrenInput.value);
+    const adults = parseInt(adultsInput?.value || "0");
+    const children = parseInt(childrenInput?.value || "0");
     const totalTravelers = adults + children;
-    const totalPrice = totalTravelers * packageData.price;
+    const totalPrice = totalTravelers * packagePrice;
 
-    summaryTravelers.textContent = `${adults} adult${adults !== 1 ? 's' : ''}, ${children} child${children !== 1 ? 'ren' : ''}`;
-    totalAmount.textContent = `$${totalPrice}`;
+    if (summaryTravelers)
+      summaryTravelers.textContent = `${adults} adult${adults !== 1 ? "s" : ""}, ${children} child${children !== 1 ? "ren" : ""}`;
+    if (totalAmount) totalAmount.textContent = `$${totalPrice}`;
   }
 
   // Initialize summary
   updateSummary();
 
   // Handle form submission
-  bookingForm.addEventListener('submit', async (e) => {
+  bookingForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    submitButton.disabled = true;
-    submitButton.textContent = 'Creating Booking...';
-    errorMessage.classList.add('hidden');
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Creating Booking...";
+    }
+    errorMessage?.classList.add("hidden");
 
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       const formData = new FormData(bookingForm);
       const bookingData = {
-        package_id: packageData.id,
+        user_id: user.id,
+        package_id: packageId,
         travel_dates: {
-          start_date: formData.get('startDate'),
-          end_date: formData.get('endDate')
+          start_date: formData.get("startDate"),
+          end_date: formData.get("endDate"),
         },
         participants: {
-          adults: parseInt(formData.get('adults')),
-          children: parseInt(formData.get('children'))
+          adults: parseInt(formData.get("adults") as string),
+          children: parseInt(formData.get("children") as string),
         },
-        special_requests: formData.get('specialRequests'),
+        special_requests: formData.get("specialRequests"),
         total_price: calculateTotalPrice(),
-        status: 'pending'
+        status: "pending",
       };
 
       // Create booking in database
       const { data: booking, error } = await supabase
-        .from('bookings')
+        .from("bookings")
         .insert([bookingData])
         .select()
         .single();
@@ -344,19 +423,23 @@ if (error || !pkg) {
 
       // Redirect to payment page
       window.location.href = `/packages/book/${booking.id}/payment`;
-
-    } catch (error) {
-      console.error('Error creating booking:', error);
-      errorMessage.textContent = error.message || 'Failed to create booking. Please try again.';
-      errorMessage.classList.remove('hidden');
-      submitButton.disabled = false;
-      submitButton.textContent = 'Proceed to Payment';
+    } catch (error: any) {
+      console.error("Error creating booking:", error);
+      if (errorMessage) {
+        errorMessage.textContent =
+          error.message || "Failed to create booking. Please try again.";
+        errorMessage.classList.remove("hidden");
+      }
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Proceed to Payment";
+      }
     }
   });
 
   function calculateTotalPrice() {
-    const adults = parseInt(adultsInput.value);
-    const children = parseInt(childrenInput.value);
-    return (adults + children) * packageData.price;
+    const adults = parseInt(adultsInput?.value || "0");
+    const children = parseInt(childrenInput?.value || "0");
+    return (adults + children) * packagePrice;
   }
 </script>

@@ -2,17 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import { supabase } from "../../lib/supabase";
 
-export const prerender = true;
-
-export async function getStaticPaths() {
-  const { data: packages } = await supabase.from("packages").select("id");
-
-  return (
-    packages?.map((pkg) => ({
-      params: { id: pkg.id },
-    })) || []
-  );
-}
+export const prerender = false;
 
 const { id } = Astro.params;
 const { data: pkg, error } = await supabase
@@ -52,7 +42,7 @@ if (error || !pkg) {
           {
             pkg.images && pkg.images.length > 1 && (
               <div class="grid grid-cols-4 gap-4">
-                {pkg.images.slice(1, 5).map((image, index) => (
+                {pkg.images.slice(1, 5).map((image: string, index: number) => (
                   <div class="aspect-square rounded-xl overflow-hidden">
                     <img
                       src={image}
@@ -69,17 +59,21 @@ if (error || !pkg) {
         <!-- Package Info -->
         <div class="space-y-6">
           <div>
-            <h1 class="text-4xl md:text-5xl font-serif text-ocean mb-2">
-              {pkg.title}
+            <h1 class="text-4xl md:text-5xl font-serif text-ocean mb-2 italic">
+              {pkg.title || pkg.name}
             </h1>
             <div class="flex items-center gap-4 text-lg">
               <span class="flex items-center gap-2">
-                <span class="text-2xl">📍</span>
-                {pkg.destination}
+                <span class="text-2xl text-teal">📍</span>
+                {
+                  pkg.destination ||
+                    pkg.custom_destination ||
+                    "Adventure Destination"
+                }
               </span>
               <span class="flex items-center gap-2">
-                <span class="text-2xl">📅</span>
-                {pkg.duration_days} days
+                <span class="text-2xl text-teal">📅</span>
+                {pkg.duration_days || pkg.duration || "N/A"} Days
               </span>
             </div>
           </div>
@@ -117,19 +111,29 @@ if (error || !pkg) {
       <!-- Itinerary Section -->
       {
         pkg.itinerary && (
-          <div class="bg-white rounded-3xl shadow-lg p-8 mb-8">
-            <h2 class="text-3xl font-serif text-ocean mb-6">Your Itinerary</h2>
-            <div class="space-y-6">
-              {Object.entries(pkg.itinerary).map(([day, activities]) => (
-                <div class="border-l-4 border-teal pl-6">
-                  <h3 class="text-xl font-serif text-ocean mb-2">Day {day}</h3>
-                  <div class="text-ocean/80 space-y-2">
+          <div class="bg-white rounded-3xl shadow-lg p-10 mb-12 border border-sky/20">
+            <h2 class="text-3xl font-serif text-ocean mb-10 border-b border-sky/10 pb-4">
+              Your Journey Itinerary
+            </h2>
+            <div class="relative space-y-8 before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gradient-to-b before:from-teal/50 before:to-sky/50">
+              {Object.entries(pkg.itinerary || {}).map(([day, activities]) => (
+                <div class="relative pl-12 group">
+                  <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-teal text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-teal/30 group-hover:scale-110 transition-transform">
+                    {day}
+                  </div>
+                  <h3 class="text-xl font-serif text-ocean mb-3">Day {day}</h3>
+                  <div class="text-ocean/80 bg-sky/5 p-4 rounded-2xl border border-sky/10">
                     {Array.isArray(activities) ? (
-                      activities.map((activity, index) => (
-                        <p key={index}>• {activity}</p>
-                      ))
+                      <ul class="space-y-2">
+                        {activities.map((activity: string) => (
+                          <li class="flex gap-2">
+                            <span class="text-teal">•</span>
+                            {activity}
+                          </li>
+                        ))}
+                      </ul>
                     ) : (
-                      <p>{activities}</p>
+                      <p class="leading-relaxed">{activities}</p>
                     )}
                   </div>
                 </div>

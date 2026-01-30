@@ -1,9 +1,22 @@
 ---
-import AdminLayout from "../../../layouts/AdminLayout.astro";
-import { createServerSupabaseClient } from "../../../lib/supabase";
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import { createServerSupabaseClient } from "../../../../lib/supabase";
+
+const { id } = Astro.params;
 
 // Create server-side Supabase client with authenticated session
 const supabase = createServerSupabaseClient(Astro.cookies);
+
+// Fetch existing package data
+const { data: pkg, error: fetchError } = await supabase
+    .from("packages")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+if (fetchError || !pkg) {
+    return Astro.redirect("/admin/packages");
+}
 
 // Handle form submission
 if (Astro.request.method === "POST") {
@@ -17,9 +30,10 @@ if (Astro.request.method === "POST") {
         const custom_destination = formData.get("custom_destination");
         const imageFiles = formData.getAll("images") as File[];
 
-        const imageUrls: string[] = [];
+        let imageUrls: string[] = [...(pkg.images || [])];
 
-        // Process multiple images
+        // Process new images if any are uploaded
+        const newImageUrls: string[] = [];
         for (const imageFile of imageFiles) {
             if (imageFile && imageFile.size > 0) {
                 const fileExt = imageFile.name.split(".").pop();
@@ -38,12 +52,17 @@ if (Astro.request.method === "POST") {
                     data: { publicUrl },
                 } = supabase.storage.from("packages").getPublicUrl(fileName);
 
-                imageUrls.push(publicUrl);
+                newImageUrls.push(publicUrl);
             }
         }
 
-        if (imageUrls.length === 0) {
-            throw new Error("At least one image is required");
+        // If new images were uploaded, we might want to replace the old ones or append.
+        // For this implementation, let's append if there are new ones,
+        // or keep old ones if no new ones are uploaded.
+        // If the user wants to completely replace, we should handle that.
+        // To keep it simple: if new images are uploaded, use only new ones.
+        if (newImageUrls.length > 0) {
+            imageUrls = newImageUrls;
         }
 
         const inclusions = formData
@@ -70,28 +89,31 @@ if (Astro.request.method === "POST") {
             }
         });
 
-        const { error } = await supabase.from("packages").insert({
-            name: title,
-            description,
-            price: parseFloat(price?.toString() || "0"),
-            duration: parseInt(duration?.toString() || "0"),
-            destination_id: destination_id
-                ? parseInt(destination_id.toString())
-                : null,
-            custom_destination: custom_destination?.toString() || null,
-            images: imageUrls, // Store array of image URLs
-            image_url: imageUrls[0], // First image for backward compatibility
-            inclusions,
-            exclusions,
-            is_featured: is_featured,
-            itinerary: Object.keys(itinerary).length > 0 ? itinerary : null,
-        });
+        const { error } = await supabase
+            .from("packages")
+            .update({
+                name: title,
+                description,
+                price: parseFloat(price?.toString() || "0"),
+                duration: parseInt(duration?.toString() || "0"),
+                destination_id: destination_id
+                    ? parseInt(destination_id.toString())
+                    : null,
+                custom_destination: custom_destination?.toString() || null,
+                images: imageUrls,
+                image_url: imageUrls[0],
+                inclusions,
+                exclusions,
+                is_featured: is_featured,
+                itinerary: Object.keys(itinerary).length > 0 ? itinerary : null,
+            })
+            .eq("id", id);
 
         if (error) throw error;
 
         return Astro.redirect("/admin/packages");
     } catch (error) {
-        console.error("Error creating package:", error);
+        console.error("Error updating package:", error);
     }
 }
 
@@ -102,10 +124,10 @@ const { data: countries } = await supabase
     .order("name");
 ---
 
-<AdminLayout title="Create Package">
+<AdminLayout title={`Edit ${pkg.name}`}>
     <div class="max-w-3xl mx-auto">
         <div class="flex items-center justify-between mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Create New Package</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Edit Package</h1>
             <a
                 href="/admin/packages"
                 class="text-gray-600 hover:text-gray-800 font-medium"
@@ -132,6 +154,7 @@ const { data: countries } = await supabase
                         id="title"
                         name="title"
                         required
+                        value={pkg.name}
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
                         placeholder="e.g., Magical Maldives"
                     />
@@ -150,8 +173,11 @@ const { data: countries } = await supabase
                     >
                         <option value="">Select a country...</option>
                         {
-                            countries?.map((country) => (
-                                <option value={country.id}>
+                            countries?.map((country: any) => (
+                                <option
+                                    value={country.id}
+                                    selected={pkg.country_id === country.id}
+                                >
                                     {country.name}
                                 </option>
                             ))
@@ -170,6 +196,7 @@ const { data: countries } = await supabase
                         id="custom_destination"
                         name="custom_destination"
                         required
+                        value={pkg.custom_destination || ""}
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
                         placeholder="e.g., Paris, France or Custom Location"
                     />
@@ -180,11 +207,12 @@ const { data: countries } = await supabase
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 py-2">
+            <div class="flex items-center gap-2 pb-4">
                 <input
                     type="checkbox"
                     id="is_featured"
                     name="is_featured"
+                    checked={pkg.is_featured}
                     class="w-4 h-4 text-teal border-gray-300 rounded focus:ring-teal"
                 />
                 <label
@@ -207,7 +235,8 @@ const { data: countries } = await supabase
                     required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
                     placeholder="Detailed description of the package..."
-                ></textarea>
+                    >{pkg.description}</textarea
+                >
             </div>
 
             <!-- Details -->
@@ -225,6 +254,7 @@ const { data: countries } = await supabase
                         min="0"
                         step="0.01"
                         required
+                        value={pkg.price}
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
                     />
                 </div>
@@ -241,6 +271,7 @@ const { data: countries } = await supabase
                         name="duration"
                         min="1"
                         required
+                        value={pkg.duration}
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
                         placeholder="e.g., 5"
                     />
@@ -251,7 +282,7 @@ const { data: countries } = await supabase
                 <label
                     for="images"
                     class="block text-sm font-medium text-gray-700"
-                    >Package Images</label
+                    >Package Images (Leave empty to keep existing)</label
                 >
                 <input
                     type="file"
@@ -259,13 +290,25 @@ const { data: countries } = await supabase
                     name="images"
                     accept="image/*"
                     multiple
-                    required
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
                 />
                 <p class="text-sm text-gray-500">
-                    Upload 1-5 high-quality images for the package gallery.
-                    First image will be the main display image.
+                    Currently has {pkg.images?.length || 0} images. Uploading new
+                    images will replace them.
                 </p>
+                {
+                    pkg.images && pkg.images.length > 0 && (
+                        <div class="flex gap-2 mt-2 overflow-x-auto p-2">
+                            {pkg.images.map((img: string) => (
+                                <img
+                                    src={img}
+                                    alt=""
+                                    class="h-20 w-20 object-cover rounded shadow"
+                                />
+                            ))}
+                        </div>
+                    )
+                }
             </div>
 
             <!-- Itinerary Section -->
@@ -284,48 +327,98 @@ const { data: countries } = await supabase
                 </div>
 
                 <div id="itinerary-container" class="space-y-4">
-                    <div
-                        class="itinerary-day bg-gray-50 p-4 rounded-xl relative group"
-                    >
-                        <div class="grid md:grid-cols-6 gap-4">
-                            <div class="md:col-span-1">
-                                <label
-                                    class="block text-xs font-semibold text-gray-500 uppercase mb-1"
-                                    >Day</label
-                                >
-                                <input
-                                    type="number"
-                                    name="it_day[]"
-                                    value="1"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal"
-                                />
+                    {
+                        pkg.itinerary ? (
+                            Object.entries(pkg.itinerary).map(
+                                ([day, activities]) => (
+                                    <div class="itinerary-day bg-gray-50 p-4 rounded-xl relative group">
+                                        <button
+                                            type="button"
+                                            class="remove-day absolute -right-2 -top-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            ×
+                                        </button>
+                                        <div class="grid md:grid-cols-6 gap-4">
+                                            <div class="md:col-span-1">
+                                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                                                    Day
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    name="it_day[]"
+                                                    value={day}
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal"
+                                                />
+                                            </div>
+                                            <div class="md:col-span-2">
+                                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                                                    Title (Optional)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="it_title[]"
+                                                    placeholder="e.g. Arrival"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal"
+                                                />
+                                            </div>
+                                            <div class="md:col-span-3">
+                                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                                                    Activities
+                                                </label>
+                                                <textarea
+                                                    name="it_desc[]"
+                                                    rows="2"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal"
+                                                >
+                                                    {Array.isArray(activities)
+                                                        ? activities.join("\n")
+                                                        : activities}
+                                                </textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ),
+                            )
+                        ) : (
+                            <div class="itinerary-day bg-gray-50 p-4 rounded-xl relative group">
+                                <div class="grid md:grid-cols-6 gap-4">
+                                    <div class="md:col-span-1">
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                                            Day
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="it_day[]"
+                                            value="1"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal"
+                                        />
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                                            Title (Optional)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="it_title[]"
+                                            placeholder="e.g. Arrival"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal"
+                                        />
+                                    </div>
+                                    <div class="md:col-span-3">
+                                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                                            Activities
+                                        </label>
+                                        <textarea
+                                            name="it_desc[]"
+                                            rows="2"
+                                            placeholder="Describe what happens on this day..."
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div class="md:col-span-2">
-                                <label
-                                    class="block text-xs font-semibold text-gray-500 uppercase mb-1"
-                                    >Title (Optional)</label
-                                >
-                                <input
-                                    type="text"
-                                    name="it_title[]"
-                                    placeholder="e.g. Arrival"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal"
-                                />
-                            </div>
-                            <div class="md:col-span-3">
-                                <label
-                                    class="block text-xs font-semibold text-gray-500 uppercase mb-1"
-                                    >Activities</label
-                                >
-                                <textarea
-                                    name="it_desc[]"
-                                    rows="2"
-                                    placeholder="Describe what happens on this day..."
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal"
-                                ></textarea>
-                            </div>
-                        </div>
-                    </div>
+                        )
+                    }
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6">
@@ -343,7 +436,8 @@ const { data: countries } = await supabase
                         placeholder="Accommodation
 Breakfast
 Transfers"
-                    ></textarea>
+                        >{pkg.inclusions?.join("\n")}</textarea
+                    >
                 </div>
 
                 <div class="space-y-2">
@@ -359,7 +453,9 @@ Transfers"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal focus:border-transparent"
                         placeholder="Flights
 Visa
-Personal Expenses"></textarea>
+Personal Expenses"
+                        >{pkg.exclusions?.join("\n")}</textarea
+                    >
                 </div>
             </div>
 
@@ -374,7 +470,7 @@ Personal Expenses"></textarea>
                     type="submit"
                     class="px-6 py-2 bg-teal text-white rounded-lg hover:bg-teal/90 font-medium transition-colors"
                 >
-                    Create Package
+                    Update Package
                 </button>
             </div>
         </form>
@@ -384,6 +480,13 @@ Personal Expenses"></textarea>
 <script>
     const container = document.getElementById("itinerary-container");
     const addButton = document.getElementById("add-day");
+
+    // Handle initial removal buttons if any
+    container?.querySelectorAll(".remove-day").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            btn.closest(".itinerary-day")?.remove();
+        });
+    });
 
     addButton?.addEventListener("click", () => {
         const nextDay =
